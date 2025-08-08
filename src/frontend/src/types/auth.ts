@@ -37,6 +37,7 @@ export interface AuthContextType {
   signUp: (credentials: SignUpCredentials) => Promise<void>;
   signOut: () => void;
   isAuthenticated: boolean;
+  error: string | null;
 }
 
 export interface ApiResponse<T = any> {

@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
-import { User, SignInCredentials, SignUpCredentials, AuthContextType } from '@/types';
-import { authService, tokenManager } from '@/utils/authService';
+import { User, SignInCredentials, SignUpCredentials, AuthContextType } from '../types';
+import { authService, tokenManager } from '../utils/authService';
 
 // Auth state interface
 interface AuthState {
@@ -149,7 +149,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     signIn,
     signUp,
     signOut,
-    isAuthenticated: !!state.user
+    isAuthenticated: !!state.user,
+    error: state.error
   };
 
   return (

@@ -32,7 +32,7 @@ export default defineConfig(({ mode }) => {
       // 代码分割
       rollupOptions: {
         input: {
-          main: resolve(__dirname, 'auth-app.html'),
+          main: resolve(__dirname, 'index.html'),
         },
         output: {
           manualChunks: {

@@ -1,4 +1,4 @@
-import { User, SignInCredentials, SignUpCredentials, ApiResponse } from '@/types';
+import { User, SignInCredentials, SignUpCredentials, ApiResponse } from '../types';
 import { 
   findUserByEmail, 
   findUserByUsername, 

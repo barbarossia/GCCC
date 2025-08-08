@@ -1,4 +1,4 @@
-import { User } from '@/types';
+import { User } from '../types';
 
 // Mock users data
 export const mockUsers: User[] = [

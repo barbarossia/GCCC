@@ -1,47 +1,72 @@
 {
   "name": "gccc-frontend",
-  "version": "0.1.0",
-  "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.17.0",
-    "@testing-library/react": "^13.4.0",
-    "@testing-library/user-event": "^14.5.2",
-    "@types/jest": "^27.5.2",
-    "@types/node": "^16.18.68",
-    "@types/react": "^18.2.42",
-    "@types/react-dom": "^18.2.17",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "react-router-dom": "^6.20.1",
-    "react-scripts": "5.0.1",
-    "typescript": "^4.9.5",
-    "web-vitals": "^2.1.4"
-  },
+  "version": "1.0.0",
+  "description": "GCCC Frontend Application with Authentication System",
+  "type": "module",
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,html,css,md}\"",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "test": "vitest --run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "test:ui": "vitest --ui --config vitest.config.ts",
+    "test:coverage": "vitest --coverage --config vitest.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "clean": "rm -rf dist node_modules/.vite",
+    "serve": "serve dist"
   },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
-  },
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@types/react-router-dom": "^5.3.3"
+    "@playwright/test": "^1.40.0",
+    "@testing-library/jest-dom": "^6.6.4",
+    "@testing-library/react": "^14.3.1",
+    "@testing-library/user-event": "^14.6.1",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "@vitejs/plugin-react": "^4.1.1",
+    "@vitest/ui": "^1.0.0",
+    "eslint": "^8.53.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "husky": "^8.0.3",
+    "jsdom": "^23.2.0",
+    "prettier": "^3.1.0",
+    "serve": "^14.2.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "gccc",
+    "frontend",
+    "react",
+    "typescript",
+    "authentication",
+    "web3",
+    "solana"
+  ],
+  "author": "GCCC Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/barbarossia/GCCC.git",
+    "directory": "src/frontend"
+  },
+  "homepage": "https://gccc.com",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

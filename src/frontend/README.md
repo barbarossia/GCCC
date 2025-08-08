@@ -5,6 +5,7 @@
 ## ✅ 最新更新 (2025-08-08)
 
 ### 🔄 项目重构完成
+
 - **目录结构优化**: 将源代码和测试文件清晰分离到 `src/` 和 `tests/` 目录
 - **开发环境完善**: 集成 Vite + TypeScript + Vitest 现代化开发栈
 - **VS Code 集成**: 完整的开发环境配置，支持智能提示和错误检查
@@ -12,6 +13,7 @@
 - **开发服务器**: 支持热重载的开发服务器运行在 `http://localhost:3001`
 
 ### 🎯 当前项目状态
+
 - **✅ 开发环境**: Vite 开发服务器正常运行
 - **✅ VS Code 配置**: TypeScript语言服务器和扩展完全配置
 - **✅ 测试套件**: 10/10 测试通过，包含认证服务和基础功能测试
@@ -20,6 +22,7 @@
 - **✅ 代码组织**: 专业级别的目录结构和代码分离
 
 ### 🆕 VS Code 优化更新
+
 - **智能提示**: 完整的 IntelliSense 和自动补全
 - **错误检查**: 实时 TypeScript 和 ESLint 错误提示
 - **自动格式化**: 保存时自动格式化代码
@@ -29,9 +32,11 @@
 ## 🚀 快速开始
 
 ### 直接运行 (HTML版本)
+
 打开 `auth-app.html` 在浏览器中即可使用完整的认证系统。
 
 ### 开发环境运行 (推荐)
+
 ```bash
 # 安装依赖
 npm install
@@ -44,6 +49,7 @@ npm run dev
 ```
 
 ### 测试账户
+
 - **管理员**: `admin@gccc.com` / `admin123`
 - **普通用户**: `user@gccc.com` / `user123`
 
@@ -83,18 +89,21 @@ frontend/
 ## ✨ 功能特色
 
 ### 🔐 认证系统
+
 - **用户登录**: 邮箱密码登录，支持管理员和普通用户
 - **用户注册**: 完整的注册流程，包含表单验证
 - **会话管理**: LocalStorage持久化登录状态
 - **角色区分**: 管理员和普通用户不同的界面权限
 
 ### 🎨 用户界面
+
 - **现代化设计**: 玻璃态效果 (Glass Morphism)
 - **响应式布局**: 适配桌面和移动设备
 - **流畅动画**: 加载状态、错误提示、悬停效果
 - **专业配色**: 紫蓝渐变背景，白色半透明卡片
 
 ### 📊 用户仪表板
+
 - **个人资料**: 头像、用户名、邮箱、角色标签
 - **等级系统**: 经验值、等级显示
 - **推荐系统**: 推荐码、推荐人数统计
@@ -103,6 +112,7 @@ frontend/
 ### 🛠️ 技术实现
 
 ### 核心技术
+
 - **React 18**: 使用Hooks (useState, useEffect, useContext)
 - **TypeScript**: 完整的类型安全，现代化配置
 - **Vite**: 现代化构建工具和开发服务器
@@ -111,6 +121,7 @@ frontend/
 - **Tailwind CSS**: 实用优先的样式框架
 
 ### 开发环境
+
 - **VS Code**: 专业级IDE配置，完整的TypeScript支持
 - **ESLint + Prettier**: 代码质量和格式化
 - **热重载**: 代码修改后自动刷新
@@ -118,6 +129,7 @@ frontend/
 - **智能提示**: 完整的IntelliSense和自动导入
 
 ### 架构设计
+
 - **组件化**: 可重用的UI组件，清晰的职责分离
 - **服务层**: 模拟API服务，易于替换为真实API
 - **类型安全**: 完整的TypeScript类型定义
@@ -125,6 +137,7 @@ frontend/
 - **测试驱动**: 完整的测试覆盖和持续集成
 
 ### 开发环境特性
+
 - **热重载**: 代码修改后自动刷新
 - **类型检查**: 实时TypeScript错误提示
 - **代码分割**: 优化的构建输出
@@ -133,14 +146,16 @@ frontend/
 ## 📝 代码结构说明
 
 ### 核心文件
+
 - `src/App.tsx`: React应用主入口组件
 - `src/main.tsx`: 应用启动文件和React DOM渲染
-- `src/types/auth.ts`: 用户、认证凭据等类型定义  
+- `src/types/auth.ts`: 用户、认证凭据等类型定义
 - `src/utils/authService.ts`: 认证服务，处理登录注册逻辑
 - `src/contexts/AuthContext.tsx`: React Context，管理认证状态
 - `tests/`: 完整的测试套件，确保代码质量
 
 ### 组件组织
+
 ```typescript
 // 认证相关类型 (src/types/auth.ts)
 interface User {
@@ -152,21 +167,25 @@ interface User {
 }
 
 // 认证服务 (src/utils/authService.ts)
-authService.signIn(credentials) // 登录
-authService.signUp(credentials) // 注册
+authService.signIn(credentials); // 登录
+authService.signUp(credentials); // 注册
 
 // Context状态管理 (src/contexts/AuthContext.tsx)
-{ user, isLoading, error, signIn, signUp, signOut }
+{
+  (user, isLoading, error, signIn, signUp, signOut);
+}
 ```
 
 ## 🚧 开发指南
 
 ### 环境要求
+
 - **Node.js**: >= 18.0.0
 - **npm**: >= 8.0.0
 - **现代浏览器**: Chrome 90+, Firefox 88+, Safari 14+
 
 ### 快速启动
+
 ```bash
 # 克隆项目
 git clone https://github.com/barbarossia/GCCC.git
@@ -185,6 +204,7 @@ npm test
 ```
 
 ### 可用脚本
+
 ```bash
 npm run dev          # 启动开发服务器 (http://localhost:3001)
 npm run build        # 构建生产版本
@@ -200,16 +220,18 @@ npm run format       # 代码格式化
 ## 🎯 VS Code 开发环境配置
 
 ### 推荐扩展 (已配置)
+
 我们已经为项目配置了最佳的VS Code开发环境，包含以下扩展：
 
 ```bash
 ✅ TypeScript Nightly     # 最新TypeScript语言支持
-✅ ESLint                 # 实时代码质量检查  
+✅ ESLint                 # 实时代码质量检查
 ✅ Prettier               # 自动代码格式化
 ✅ React Developer Tools  # React组件调试
 ```
 
 ### 工作区配置
+
 项目已包含 `.vscode/settings.json` 配置文件，提供：
 
 - **自动导入**: TypeScript模块自动导入和整理
@@ -218,6 +240,7 @@ npm run format       # 代码格式化
 - **类型提示**: 完整的IntelliSense和参数提示
 
 ### TypeScript 配置优化
+
 ```bash
 ✅ 现代化配置: 使用最新的TypeScript和Vite兼容设置
 ✅ 路径映射: 支持 @/ 别名导入
@@ -226,6 +249,7 @@ npm run format       # 代码格式化
 ```
 
 ### 开发体验特性
+
 - **即时错误检查**: 代码编写时实时显示TypeScript错误
 - **智能重构**: 支持变量重命名、函数提取等重构操作
 - **自动导入**: 输入组件名时自动添加导入语句
@@ -235,6 +259,7 @@ npm run format       # 代码格式化
 ### 开发模式选择
 
 #### 选项1: Vite开发环境 (推荐)
+
 ```bash
 # 现代化开发体验
 npm run dev
@@ -248,6 +273,7 @@ npm run dev
 ```
 
 #### 选项2: 直接HTML开发
+
 ```bash
 # 直接在浏览器中打开
 open auth-app.html
@@ -257,6 +283,7 @@ open auth-app.html
 ### 开发工作流
 
 #### 1. 添加新功能
+
 ```bash
 # 创建功能分支
 git checkout -b feature/new-feature
@@ -278,6 +305,7 @@ git push origin feature/new-feature
 ```
 
 #### 2. 代码规范
+
 ```bash
 # 代码格式化 (如果配置了)
 npm run format
@@ -292,11 +320,12 @@ npm run lint
 ### 本地开发配置
 
 #### package.json 脚本扩展
+
 ```json
 {
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build", 
+    "build": "tsc && vite build",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,html,css,md}\"",
@@ -309,11 +338,13 @@ npm run lint
 ```
 
 #### 开发工具配置
+
 - **VS Code 扩展推荐**: ES7+ React/Redux/React-Native snippets, TypeScript Importer, Prettier
 - **浏览器工具**: React Developer Tools, Redux DevTools
 - **Git Hooks**: Husky for pre-commit checks
 
 ### 文件修改指南
+
 1. **添加新组件**: 在 `src/components/` 目录下创建，遵循命名约定
 2. **修改认证逻辑**: 编辑 `src/utils/authService.ts`
 3. **更新用户类型**: 修改 `src/types/auth.ts`
@@ -324,6 +355,7 @@ npm run lint
 ### 调试指南
 
 #### VS Code 调试设置
+
 ```bash
 # TypeScript 问题诊断
 1. 重启TypeScript语言服务器: Ctrl+Shift+P -> "TypeScript: Restart TS Server"
@@ -337,6 +369,7 @@ npm run lint
 ```
 
 #### 浏览器调试
+
 ```bash
 # 浏览器开发者工具
 F12 -> Console/Network/Application
@@ -351,6 +384,7 @@ console.log(user, isLoading, error);
 ```
 
 #### TypeScript 类型检查
+
 ```bash
 # 手动类型检查
 npm run type-check
@@ -362,14 +396,18 @@ npm run type-check
 ```
 
 # 网络请求调试
+
 # 查看 Network 标签页中的模拟请求
 
 # LocalStorage 调试
+
 localStorage.getItem('gccc_token');
 
 # 状态调试
+
 # 使用 React DevTools 扩展查看 Context 状态
-```
+
+````
 
 ## 🔄 下一步开发计划
 
@@ -421,11 +459,12 @@ npm install --save-dev @commitlint/cli @commitlint/config-conventional
 
 # 代码质量检查
 npm install --save-dev sonarjs
-```
+````
 
 ## 🤝 贡献指南
 
 ### 提交规范
+
 ```bash
 # 类型
 feat:     新功能
@@ -443,6 +482,7 @@ git commit -m "docs: update deployment guide"
 ```
 
 ### 代码审查检查项
+
 ```bash
 □ 代码功能是否符合需求
 □ 是否遵循项目代码规范
@@ -459,6 +499,7 @@ git commit -m "docs: update deployment guide"
 ### 常见问题解决
 
 #### 1. VS Code TypeScript 问题
+
 ```bash
 # 问题: "Cannot find module" 错误
 解决方案:
@@ -481,6 +522,7 @@ git commit -m "docs: update deployment guide"
 ```
 
 #### 2. 依赖安装问题
+
 ```bash
 # 清除缓存
 npm cache clean --force
@@ -493,6 +535,7 @@ yarn install
 ```
 
 #### 3. TypeScript 编译错误
+
 ```bash
 # 重新生成类型声明
 npx tsc --noEmit
@@ -507,6 +550,7 @@ npx tsc --showConfig
 ```
 
 #### 4. 开发服务器问题
+
 ```bash
 # Vite 开发服务器启动失败
 npm run dev
@@ -520,6 +564,7 @@ npm run dev
 ```
 
 #### 5. 样式问题
+
 ```bash
 # Tailwind CSS 样式不生效
 # 检查 CDN 链接是否正确
@@ -527,6 +572,7 @@ npm run dev
 ```
 
 #### 4. 构建问题
+
 ```bash
 # 构建失败
 npm run clean  # 清除构建缓存
@@ -537,6 +583,7 @@ echo $NODE_ENV
 ```
 
 ### 获取帮助
+
 - **项目 Issues**: [GitHub Issues](https://github.com/barbarossia/GCCC/issues)
 - **技术讨论**: [GitHub Discussions](https://github.com/barbarossia/GCCC/discussions)
 - **邮件支持**: dev@gccc.com
@@ -553,9 +600,11 @@ echo $NODE_ENV
 ## 🧪 测试指南
 
 ### 测试策略
+
 我们采用多层测试策略确保代码质量和功能稳定性:
 
 #### 1. 单元测试 (Unit Tests)
+
 ```bash
 # 安装测试依赖
 npm install --save-dev vitest @testing-library/react @testing-library/jest-dom
@@ -572,6 +621,7 @@ npm run test:coverage
 ```
 
 **测试文件结构**:
+
 ```
 tests/                          # 前端测试目录
 ├── setup.ts                    # 测试环境配置
@@ -584,6 +634,7 @@ tests/                          # 前端测试目录
 ```
 
 **示例测试用例**:
+
 ```typescript
 // tests/components/LoginForm.test.tsx
 import { render, screen } from '@testing-library/react';
@@ -619,6 +670,7 @@ describe('Auth Service', () => {
 ```
 
 #### 2. 集成测试 (Integration Tests)
+
 ```bash
 # 测试组件间集成
 npm run test:integration
@@ -627,12 +679,12 @@ npm run test:integration
 describe('Authentication Flow', () => {
   test('complete sign-in process', async () => {
     render(<App />);
-    
+
     // 填写登录表单
     await userEvent.type(screen.getByLabelText('邮箱地址'), 'admin@gccc.com');
     await userEvent.type(screen.getByLabelText('密码'), 'admin123');
     await userEvent.click(screen.getByRole('button', { name: '登录' }));
-    
+
     // 验证登录成功
     await waitFor(() => {
       expect(screen.getByText('欢迎回来')).toBeInTheDocument();
@@ -642,6 +694,7 @@ describe('Authentication Flow', () => {
 ```
 
 #### 3. 端到端测试 (E2E Tests)
+
 ```bash
 # 安装 Playwright
 npm install --save-dev @playwright/test
@@ -654,18 +707,19 @@ npm run test:e2e:ui
 ```
 
 **E2E 测试示例**:
+
 ```typescript
 // ../test/e2e/auth.spec.ts
 import { test, expect } from '@playwright/test';
 
 test('user can sign in and access dashboard', async ({ page }) => {
   await page.goto('http://localhost:3000');
-  
+
   // 登录
   await page.fill('[name="email"]', 'admin@gccc.com');
   await page.fill('[name="password"]', 'admin123');
   await page.click('button[type="submit"]');
-  
+
   // 验证仪表板
   await expect(page.locator('h2')).toContainText('admin');
   await expect(page.locator('.glass-effect')).toBeVisible();
@@ -673,20 +727,20 @@ test('user can sign in and access dashboard', async ({ page }) => {
 
 test('user registration flow', async ({ page }) => {
   await page.goto('http://localhost:3000');
-  
+
   // 切换到注册页面
   await page.click('text=立即注册');
-  
+
   // 填写注册表单
   await page.fill('[name="email"]', 'newuser@test.com');
   await page.fill('[name="username"]', 'newuser');
   await page.fill('[name="password"]', 'password123');
   await page.fill('[name="confirmPassword"]', 'password123');
   await page.check('[name="agreeToTerms"]');
-  
+
   // 提交注册
   await page.click('button[type="submit"]');
-  
+
   // 验证注册成功
   await expect(page.locator('h2')).toContainText('newuser');
 });
@@ -695,6 +749,7 @@ test('user registration flow', async ({ page }) => {
 ### 手动测试
 
 #### 功能测试清单
+
 ```bash
 # 认证功能
 □ 登录表单验证 (空字段、格式验证)
@@ -729,6 +784,7 @@ test('user registration flow', async ({ page }) => {
 ```
 
 #### 性能测试
+
 ```bash
 # 使用浏览器开发者工具
 1. Network 标签: 检查资源加载时间
@@ -743,6 +799,7 @@ test('user registration flow', async ({ page }) => {
 ```
 
 #### 可访问性测试
+
 ```bash
 # 工具推荐
 - axe DevTools (浏览器扩展)
@@ -760,6 +817,7 @@ test('user registration flow', async ({ page }) => {
 ### 测试环境配置
 
 #### vitest.config.ts
+
 ```typescript
 import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
@@ -771,17 +829,14 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     coverage: {
       reporter: ['text', 'json', 'html'],
-      exclude: [
-        'node_modules/',
-        'tests/',
-        '**/*.d.ts',
-      ],
+      exclude: ['node_modules/', 'tests/', '**/*.d.ts'],
     },
   },
 });
 ```
 
 #### 测试覆盖率目标
+
 - **语句覆盖率**: > 80%
 - **分支覆盖率**: > 75%
 - **函数覆盖率**: > 80%
@@ -792,6 +847,7 @@ export default defineConfig({
 ### 部署策略
 
 #### 1. 静态部署 (推荐快速部署)
+
 适用于当前的单HTML文件应用:
 
 ```bash
@@ -814,6 +870,7 @@ git push origin main
 ```
 
 #### 2. React 应用部署
+
 适用于完整的React开发环境:
 
 ```bash
@@ -837,6 +894,7 @@ gh-pages -d dist
 ### 环境配置
 
 #### 1. 开发环境 (Development)
+
 ```bash
 # 环境变量: .env.development
 VITE_API_BASE_URL=http://localhost:3001/api
@@ -851,6 +909,7 @@ VITE_DEBUG=true
 ```
 
 #### 2. 测试环境 (Staging)
+
 ```bash
 # 环境变量: .env.staging
 VITE_API_BASE_URL=https://staging-api.gccc.com/api
@@ -865,6 +924,7 @@ VITE_DEBUG=false
 ```
 
 #### 3. 生产环境 (Production)
+
 ```bash
 # 环境变量: .env.production
 VITE_API_BASE_URL=https://api.gccc.com/api
@@ -882,41 +942,42 @@ VITE_ANALYTICS_ID=GA_TRACKING_ID
 ### CI/CD 管道
 
 #### GitHub Actions 配置
+
 ```yaml
 # .github/workflows/deploy.yml
 name: Deploy Frontend
 
 on:
   push:
-    branches: [ main ]
-    paths: [ 'src/frontend/**' ]
+    branches: [main]
+    paths: ['src/frontend/**']
   pull_request:
-    branches: [ main ]
-    paths: [ 'src/frontend/**' ]
+    branches: [main]
+    paths: ['src/frontend/**']
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: src/frontend/package-lock.json
-      
+
       - name: Install dependencies
         run: |
           cd src/frontend
           npm ci
-      
+
       - name: Run tests
         run: |
           cd src/frontend
           npm run test:coverage
-      
+
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
@@ -927,24 +988,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
           cache-dependency-path: src/frontend/package-lock.json
-      
+
       - name: Install dependencies
         run: |
           cd src/frontend
           npm ci
-      
+
       - name: Build application
         run: |
           cd src/frontend
           npm run build
-      
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
         with:
@@ -961,7 +1022,7 @@ jobs:
         with:
           name: build-files
           path: dist
-      
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
@@ -974,6 +1035,7 @@ jobs:
 ### 性能优化
 
 #### 1. 构建优化
+
 ```typescript
 // vite.config.ts
 import { defineConfig } from 'vite';
@@ -1006,6 +1068,7 @@ export default defineConfig({
 ```
 
 #### 2. 资源优化
+
 ```bash
 # 图片优化
 npm install --save-dev vite-plugin-imagemin
@@ -1018,6 +1081,7 @@ npm install --save-dev vite-plugin-pwa
 ```
 
 #### 3. CDN 配置
+
 ```html
 <!-- 使用 CDN 加速常用库 -->
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -1028,6 +1092,7 @@ npm install --save-dev vite-plugin-pwa
 ### 监控和分析
 
 #### 1. 错误监控
+
 ```bash
 # 安装 Sentry
 npm install @sentry/react @sentry/tracing
@@ -1043,6 +1108,7 @@ Sentry.init({
 ```
 
 #### 2. 性能分析
+
 ```bash
 # Google Analytics
 npm install gtag
@@ -1052,6 +1118,7 @@ npm install web-vitals
 ```
 
 #### 3. 安全配置
+
 ```bash
 # Content Security Policy
 Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' unpkg.com cdn.tailwindcss.com; style-src 'self' 'unsafe-inline' cdn.tailwindcss.com; img-src 'self' data: api.dicebear.com;
@@ -1069,6 +1136,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 ### 域名和SSL
 
 #### 1. 自定义域名
+
 ```bash
 # Vercel 配置
 vercel domains add your-domain.com
@@ -1078,6 +1146,7 @@ netlify sites:update --name=your-site-name --custom-domain=your-domain.com
 ```
 
 #### 2. SSL 证书
+
 ```bash
 # 自动 HTTPS (Vercel/Netlify 自动提供)
 # Let's Encrypt 免费证书
@@ -1087,6 +1156,7 @@ netlify sites:update --name=your-site-name --custom-domain=your-domain.com
 ### 部署检查清单
 
 #### 部署前检查
+
 ```bash
 □ 运行所有测试 (npm run test)
 □ 检查类型错误 (npm run type-check)
@@ -1098,6 +1168,7 @@ netlify sites:update --name=your-site-name --custom-domain=your-domain.com
 ```
 
 #### 部署后验证
+
 ```bash
 □ 网站可访问
 □ 所有功能正常
@@ -1110,6 +1181,7 @@ netlify sites:update --name=your-site-name --custom-domain=your-domain.com
 ```
 
 ### 回滚策略
+
 ```bash
 # Vercel 回滚
 vercel rollback [deployment-url]

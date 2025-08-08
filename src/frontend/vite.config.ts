@@ -1,6 +1,9 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
-import { resolve } from 'path';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => {
   return {
@@ -16,7 +19,7 @@ export default defineConfig(({ mode }) => {
     
     // 构建配置
     build: {
-      target: 'es2015',
+      target: 'ES2020',
       outDir: 'dist',
       sourcemap: mode === 'development',
       minify: mode === 'production' ? 'terser' : false,
@@ -31,13 +34,9 @@ export default defineConfig(({ mode }) => {
       
       // 代码分割
       rollupOptions: {
-        input: {
-          main: resolve(__dirname, 'index.html'),
-        },
         output: {
           manualChunks: {
             vendor: ['react', 'react-dom'],
-            utils: ['./utils/authService', './utils/mockData'],
           },
         },
       },
@@ -50,17 +49,17 @@ export default defineConfig(({ mode }) => {
     // 路径解析
     resolve: {
       alias: {
-        '@': resolve(__dirname, './'),
-        '@components': resolve(__dirname, './components'),
-        '@utils': resolve(__dirname, './utils'),
-        '@types': resolve(__dirname, './types'),
-        '@contexts': resolve(__dirname, './contexts'),
+        '@': path.resolve(__dirname, './src'),
+        '@/components': path.resolve(__dirname, './src/components'),
+        '@/utils': path.resolve(__dirname, './src/utils'),
+        '@/types': path.resolve(__dirname, './src/types'),
+        '@/contexts': path.resolve(__dirname, './src/contexts'),
       },
     },
     
     // 环境变量
     define: {
-      __APP_VERSION__: JSON.stringify(process.env.npm_package_version),
+      __APP_VERSION__: JSON.stringify(process.env.npm_package_version || '1.0.0'),
       __BUILD_TIME__: JSON.stringify(new Date().toISOString()),
     },
     
@@ -74,37 +73,6 @@ export default defineConfig(({ mode }) => {
     css: {
       modules: {
         localsConvention: 'camelCase',
-      },
-      preprocessorOptions: {
-        scss: {
-          additionalData: '@import "@/styles/variables.scss";',
-        },
-      },
-    },
-    
-    // 测试配置
-    test: {
-      globals: true,
-      environment: 'jsdom',
-      setupFiles: ['./tests/setup.ts'],
-      css: true,
-      coverage: {
-        provider: 'v8',
-        reporter: ['text', 'json', 'html'],
-        exclude: [
-          'node_modules/',
-          'tests/',
-          '**/*.d.ts',
-          'vite.config.ts',
-        ],
-        thresholds: {
-          global: {
-            branches: 75,
-            functions: 80,
-            lines: 80,
-            statements: 80,
-          },
-        },
       },
     },
   };

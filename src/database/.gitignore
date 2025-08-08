@@ -1,0 +1,58 @@
+# ================================
+# Database .gitignore
+# ================================
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+*.mdf
+*.ldf
+
+# Backup files
+*.backup
+*.bak
+*.sql.bak
+backups/
+
+# Migration temporary files
+migrations/temp/
+*.migration.tmp
+
+# Database connection logs
+*.log
+connection.log
+query.log
+
+# Generated schema files
+schema.generated.sql
+schema.backup.sql
+
+# Database dumps
+dumps/
+*.dump
+*.sql.gz
+
+# Local database configuration
+local.config.json
+database.local.json
+
+# ORM generated files
+prisma/migrations/
+.prisma/
+
+# Seeds for development only
+seeds/dev/
+test-data/
+
+# Performance logs
+slow-query.log
+performance.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

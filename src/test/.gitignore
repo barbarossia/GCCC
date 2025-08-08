@@ -1,0 +1,62 @@
+# ================================
+# Test .gitignore
+# ================================
+
+# Test results and reports
+test-results/
+coverage/
+reports/
+.nyc_output/
+junit.xml
+coverage.xml
+
+# Screenshots and videos (E2E tests)
+screenshots/
+videos/
+test-artifacts/
+
+# Playwright
+playwright-report/
+.playwright/
+
+# Jest
+.jest/
+
+# Cypress
+cypress/videos/
+cypress/screenshots/
+cypress/downloads/
+
+# Test data and fixtures
+test-data/
+fixtures/generated/
+mock-data/temp/
+
+# Performance test results
+performance-results/
+load-test-results/
+
+# Temporary test files
+*.test.tmp
+*.spec.tmp
+test.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment for testing
+.env.test
+.env.test.local
+
+# Dependencies
+node_modules/
+npm-debug.log*
+
+# Build outputs for test apps
+dist/
+build/

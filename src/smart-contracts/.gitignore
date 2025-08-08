@@ -1,0 +1,66 @@
+# ================================
+# Smart Contracts .gitignore
+# ================================
+
+# Rust/Cargo
+target/
+Cargo.lock
+**/*.rs.bk
+*.pdb
+
+# Anchor framework
+.anchor/
+test-ledger/
+.program-logs/
+
+# Solana CLI
+.config/solana/
+keypairs/
+*.json
+!Anchor.toml
+!package.json
+!tsconfig.json
+
+# Node.js (for client/tests)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+
+# Build artifacts
+programs/.bin/
+deploy/
+artifacts/
+
+# IDE and editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated
+.DS_Store
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Testing
+coverage/
+test-results/
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Deployment
+deployments/
+.program-address

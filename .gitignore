@@ -1,0 +1,302 @@
+# ================================
+# GCCC Project .gitignore
+# ================================
+
+# ================================
+# Node.js / JavaScript / TypeScript
+# ================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Dependency directories
+jspm_packages/
+bower_components/
+
+# Package manager lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ================================
+# Build outputs and artifacts
+# ================================
+dist/
+build/
+out/
+.next/
+.nuxt/
+.vite/
+.cache/
+.parcel-cache/
+.svelte-kit/
+
+# ================================
+# Environment variables
+# ================================
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.production
+.env.production.local
+.env.staging
+
+# ================================
+# Testing and Coverage
+# ================================
+coverage/
+.coverage/
+*.lcov
+.nyc_output/
+test-results/
+playwright-report/
+.vitest/
+
+# ================================
+# IDE and Editor files
+# ================================
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# ================================
+# OS generated files
+# ================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ================================
+# Logs
+# ================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ================================
+# Runtime data
+# ================================
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# ================================
+# TypeScript
+# ================================
+*.tsbuildinfo
+.tscache/
+
+# ================================
+# Frontend specific
+# ================================
+# Static files that should be ignored
+public/uploads/
+public/temp/
+
+# Storybook build outputs
+storybook-static/
+
+# ================================
+# Backend specific
+# ================================
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Uploaded files
+uploads/
+temp/
+
+# ================================
+# Smart Contracts (Rust/Solana)
+# ================================
+target/
+Cargo.lock
+**/*.rs.bk
+
+# Anchor generated files
+.anchor/
+test-ledger/
+.program-logs/
+
+# ================================
+# Database files
+# ================================
+*.sql
+*.db
+*.sqlite
+*.sqlite3
+migrations/*.sql
+!migrations/schema.sql
+
+# ================================
+# Certificates and Keys
+# ================================
+*.pem
+*.key
+*.crt
+*.csr
+*.p12
+*.pfx
+
+# SSL certificates
+ssl/
+certs/
+
+# ================================
+# Deployment and Docker
+# ================================
+.docker/
+docker-compose.override.yml
+.dockerfile
+
+# Kubernetes
+*.kubeconfig
+
+# Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+
+# ================================
+# Monitoring and Analytics
+# ================================
+.sentry/
+.vercel/
+.netlify/
+
+# ================================
+# Backup and temporary files
+# ================================
+*.backup
+*.bak
+*.tmp
+*.temp
+*~
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# ================================
+# Local development
+# ================================
+.husky/_
+.git-hooks/
+
+# Local configuration
+local.json
+local.config.js
+
+# ================================
+# Documentation build
+# ================================
+.docusaurus/
+.jekyll-cache/
+_site/
+.vuepress/dist/
+
+# ================================
+# Mobile development
+# ================================
+# React Native
+.expo/
+.expo-shared/
+
+# Flutter
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+ios/Flutter/Generated.xcconfig
+android/.gradle/
+
+# ================================
+# Python (if used for scripts)
+# ================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+
+# ================================
+# Security and sensitive data
+# ================================
+# API keys and secrets
+secrets/
+.secrets/
+.env.secret
+
+# Wallet files (be very careful with these)
+*.json
+!package.json
+!tsconfig.json
+!jest.config.json
+!*.config.json
+!.eslintrc.json
+!.prettierrc.json
+
+# ================================
+# Project specific
+# ================================
+# GCCC specific temporary files
+gccc-temp/
+temp-data/
+user-uploads/
+
+# Generated documentation
+docs/api/
+docs/generated/
+
+# Performance and profiling
+.clinic/
+profile-*
+*.heapsnapshot
+
+# ================================
+# Comments for developers
+# ================================
+# This .gitignore covers:
+# - Frontend (React, Vue, Angular, etc.)
+# - Backend (Node.js, Express, etc.)
+# - Smart Contracts (Rust, Solana, Anchor)
+# - Database files and migrations
+# - Build tools and CI/CD
+# - Development tools and IDEs
+# - Security-sensitive files
+# 
+# Remember to:
+# - Review before committing sensitive files
+# - Use .gitignore locally for personal files
+# - Update this file as the project evolves

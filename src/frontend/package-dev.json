@@ -1,0 +1,73 @@
+{
+  "name": "gccc-frontend",
+  "version": "1.0.0",
+  "description": "GCCC Frontend Application with Authentication System",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "type-check": "tsc --noEmit",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,html,css,md}\"",
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "test": "vitest",
+    "test:watch": "vitest --watch",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "clean": "rm -rf dist node_modules/.vite",
+    "serve": "serve dist",
+    "prepare": "husky install"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.1.4",
+    "@testing-library/react": "^14.1.2",
+    "@testing-library/user-event": "^14.5.1",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.10.0",
+    "@typescript-eslint/parser": "^6.10.0",
+    "@vitejs/plugin-react": "^4.1.1",
+    "@vitest/ui": "^1.0.0",
+    "@playwright/test": "^1.40.0",
+    "eslint": "^8.53.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-react": "^7.33.2",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.4",
+    "husky": "^8.0.3",
+    "jsdom": "^23.0.1",
+    "prettier": "^3.1.0",
+    "serve": "^14.2.1",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vitest": "^1.0.0"
+  },
+  "keywords": [
+    "gccc",
+    "frontend",
+    "react",
+    "typescript",
+    "authentication",
+    "web3",
+    "solana"
+  ],
+  "author": "GCCC Development Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/barbarossia/GCCC.git",
+    "directory": "src/frontend"
+  },
+  "homepage": "https://gccc.com",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  }
+}

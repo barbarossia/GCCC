@@ -1,0 +1,76 @@
+# Dependency directories
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+dist/
+build/
+.vite/
+.next/
+out/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Testing
+coverage/
+.coverage/
+.nyc_output/
+test-results/
+playwright-report/
+
+# IDE and editors
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+logs
+*.log
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Temporary files
+*.tmp
+*.temp
+
+# Lock files (uncomment if using npm)
+# package-lock.json
+
+# Husky
+.husky/_
+
+# Local development
+.env.development
+.env.staging
+
+# Backup files
+*.backup
+*.bak
+
+# Archive files
+*.zip
+*.tar.gz
+*.rar

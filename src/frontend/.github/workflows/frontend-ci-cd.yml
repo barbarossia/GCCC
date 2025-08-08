@@ -77,7 +77,7 @@ jobs:
     - name: Upload coverage reports
       uses: codecov/codecov-action@v3
       with:
-        directory: src/frontend/coverage
+        directory: src/test/frontend/coverage
         flags: frontend
         name: frontend-coverage
 

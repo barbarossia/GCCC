@@ -29,7 +29,10 @@ frontend/
 │   └── mockData.ts   # 模拟数据
 ├── package.json      # 项目依赖
 ├── tsconfig.json     # TypeScript配置
+├── vitest.config.ts  # 测试配置
 └── README.md         # 本文件
+
+注: 测试文件位于 ../test/frontend/ 目录中
 ```
 
 ## ✨ 功能特色
@@ -381,25 +384,26 @@ npm run test:coverage
 
 **测试文件结构**:
 ```
-tests/
-├── components/          # 组件测试
+../test/frontend/           # 前端测试 (位于 src/test/frontend/)
+├── setup.ts               # 测试环境配置
+├── basic.test.ts          # 基础功能测试
+├── components/            # 组件测试 (待添加)
 │   └── ui/
 │       └── Button.test.tsx
-├── contexts/           # Context测试
+├── contexts/              # Context测试 (待添加)
 │   └── AuthContext.test.tsx
-├── utils/              # 工具函数测试
+├── utils/                 # 工具函数测试 (待添加)
 │   ├── authService.test.ts
 │   └── mockData.test.ts
-├── types/              # 类型测试
-│   └── auth.test.ts
-└── setup.ts            # 测试环境配置
+└── types/                 # 类型测试 (待添加)
+    └── auth.test.ts
 ```
 
 **示例测试用例**:
 ```typescript
-// components/ui/Button.test.tsx
+// ../test/frontend/components/ui/Button.test.tsx
 import { render, screen } from '@testing-library/react';
-import { Button } from './Button';
+import { Button } from '../../../frontend/components/ui/Button';
 
 describe('Button Component', () => {
   test('renders button with text', () => {
@@ -415,8 +419,8 @@ describe('Button Component', () => {
   });
 });
 
-// utils/authService.test.ts
-import { authService } from './authService';
+// ../test/frontend/utils/authService.test.ts
+import { authService } from '../../../frontend/utils/authService';
 
 describe('Auth Service', () => {
   test('signIn with valid credentials', async () => {
@@ -443,7 +447,7 @@ describe('Auth Service', () => {
 # 测试组件间集成
 npm run test:integration
 
-# 示例: 认证流程集成测试
+# 示例: 认证流程集成测试 (../test/frontend/integration/auth.test.tsx)
 describe('Authentication Flow', () => {
   test('complete sign-in process', async () => {
     render(<App />);
@@ -475,7 +479,7 @@ npm run test:e2e:ui
 
 **E2E 测试示例**:
 ```typescript
-// e2e/auth.spec.ts
+// ../test/e2e/auth.spec.ts
 import { test, expect } from '@playwright/test';
 
 test('user can sign in and access dashboard', async ({ page }) => {

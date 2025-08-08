@@ -7,7 +7,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: ['./tests/setup.ts'],
+    setupFiles: ['../test/frontend/setup.ts'],
     css: true,
     
     coverage: {
@@ -15,7 +15,7 @@ export default defineConfig({
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
-        'tests/',
+        '../test/',
         '**/*.d.ts',
         '**/*.config.ts',
         '**/coverage/**',
@@ -34,8 +34,8 @@ export default defineConfig({
     
     // 测试文件匹配规则
     include: [
-      'tests/**/*.{test,spec}.{js,ts,tsx}',
-      '**/__tests__/**/*.{js,ts,tsx}',
+      '../test/frontend/**/*.{test,spec}.{js,ts,tsx}',
+      '../test/**/__tests__/**/*.{js,ts,tsx}',
     ],
     
     // 排除文件

@@ -1,0 +1,67 @@
+# ========================================
+# GCCC Database .dockerignore
+# 排除不需要复制到容器的文件
+# ========================================
+
+# Git相关
+.git/
+.gitignore
+.gitattributes
+
+# 文档文件
+README.md
+SUMMARY.md
+*.md
+docs/
+
+# IDE和编辑器
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# 操作系统
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker相关
+Dockerfile*
+.dockerignore
+docker-compose*.yml
+
+# 备份文件（避免将本地备份复制到镜像中）
+*.backup
+*.bak
+*.dump
+backups/
+dumps/
+
+# 日志文件
+*.log
+logs/
+
+# 临时文件
+temp/
+tmp/
+.cache/
+
+# 开发工具生成的文件
+.pytest_cache/
+.coverage
+coverage.xml
+*.cover
+.hypothesis/
+
+# 环境配置（容器将使用环境变量）
+.env*
+local.config.json
+database.local.json
+
+# PowerShell执行策略可能导致的文件
+*.ps1.backup

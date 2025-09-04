@@ -1,0 +1,277 @@
+# ========================================
+# GCCC DApp Docker Compose Configuration
+# 完整服务栈编排配置
+# ========================================
+
+version: "3.8"
+
+# 网络配置
+networks:
+  gccc-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+# 数据卷配置
+volumes:
+  gccc_db_data:
+    driver: local
+  gccc_db_backups:
+    driver: local
+  gccc_redis_data:
+    driver: local
+
+services:
+  # ========================================
+  # PostgreSQL 数据库服务
+  # ========================================
+  database:
+    build:
+      context: ./src/database
+      dockerfile: Dockerfile
+    image: gccc-database:latest
+    container_name: gccc-database
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gccc_db
+      POSTGRES_USER: gccc_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-gccc_secure_password_2024}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - gccc_db_data:/var/lib/postgresql/data
+      - gccc_db_backups:/backups
+    networks:
+      gccc-network:
+        ipv4_address: 172.20.0.2
+    healthcheck:
+      test: ["CMD-SHELL", "/scripts/health_check.sh"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    command:
+      [
+        "postgres",
+        "-c",
+        "shared_preload_libraries=pg_stat_statements",
+        "-c",
+        "pg_stat_statements.track=all",
+        "-c",
+        "log_destination=stderr",
+        "-c",
+        "log_statement=mod",
+        "-c",
+        "log_duration=on",
+        "-c",
+        "log_line_prefix=%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h ",
+        "-c",
+        "max_connections=200",
+        "-c",
+        "shared_buffers=256MB",
+        "-c",
+        "effective_cache_size=1GB",
+        "-c",
+        "work_mem=4MB",
+        "-c",
+        "maintenance_work_mem=64MB",
+        "-c",
+        "checkpoint_completion_target=0.9",
+        "-c",
+        "wal_buffers=16MB",
+        "-c",
+        "default_statistics_target=100",
+      ]
+
+  # ========================================
+  # Redis 缓存服务
+  # ========================================
+  redis:
+    image: redis:7-alpine
+    container_name: gccc-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - gccc_redis_data:/data
+    networks:
+      gccc-network:
+        ipv4_address: 172.20.0.3
+    command:
+      [
+        "redis-server",
+        "--appendonly",
+        "yes",
+        "--appendfsync",
+        "everysec",
+        "--maxmemory",
+        "256mb",
+        "--maxmemory-policy",
+        "allkeys-lru",
+      ]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ========================================
+  # Backend API 服务
+  # ========================================
+  backend:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+      target: production
+    image: gccc-backend:latest
+    container_name: gccc-backend
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      HOST: 0.0.0.0
+
+      # 数据库配置
+      DATABASE_URL: postgresql://gccc_user:${DB_PASSWORD:-gccc_secure_password_2024}@database:5432/gccc_db
+      DB_HOST: database
+      DB_PORT: 5432
+      DB_NAME: gccc_db
+      DB_USER: gccc_user
+      DB_PASSWORD: ${DB_PASSWORD:-gccc_secure_password_2024}
+
+      # Redis配置
+      REDIS_URL: redis://redis:6379
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+
+      # JWT配置
+      JWT_SECRET: ${JWT_SECRET:-gccc_jwt_secret_key_2024_very_secure}
+      JWT_EXPIRES_IN: 168h
+      REFRESH_TOKEN_SECRET: ${REFRESH_TOKEN_SECRET:-gccc_refresh_secret_2024}
+      REFRESH_TOKEN_EXPIRES_IN: 30d
+
+      # Solana配置
+      SOLANA_NETWORK: ${SOLANA_NETWORK:-devnet}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.devnet.solana.com}
+      GCCC_TOKEN_MINT: ${GCCC_TOKEN_MINT:-YourTokenMintAddressHere44Characters}
+      TREASURY_WALLET: ${TREASURY_WALLET:-YourTreasuryWalletAddressHere44Characters}
+
+      # 应用配置
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3001,http://localhost:3000}
+      API_RATE_LIMIT: ${API_RATE_LIMIT:-100}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    volumes:
+      - ./logs:/app/logs
+    networks:
+      gccc-network:
+        ipv4_address: 172.20.0.4
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+  # ========================================
+  # Nginx 反向代理 (可选)
+  # ========================================
+  nginx:
+    image: nginx:alpine
+    container_name: gccc-nginx
+    restart: unless-stopped
+    ports:
+      - "${NGINX_PORT:-80}:80"
+      - "${NGINX_SSL_PORT:-443}:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    networks:
+      gccc-network:
+        ipv4_address: 172.20.0.5
+    depends_on:
+      - backend
+    profiles:
+      - with-nginx
+
+# ========================================
+# 开发环境覆盖配置
+# ========================================
+---
+# docker-compose.override.yml (开发环境自动加载)
+version: "3.8"
+
+services:
+  # 开发模式的后端服务
+  backend-dev:
+    build:
+      context: ./src/backend
+      dockerfile: Dockerfile
+      target: development
+    image: gccc-backend:dev
+    container_name: gccc-backend-dev
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      HOST: 0.0.0.0
+    ports:
+      - "3000:3000"
+      - "9229:9229" # 调试端口
+    volumes:
+      - ./src/backend:/app
+      - /app/node_modules
+      - ./logs:/app/logs
+    networks:
+      - gccc-network
+    depends_on:
+      - database
+      - redis
+    profiles:
+      - development
+# ========================================
+# 使用说明:
+#
+# 启动完整服务栈 (生产模式):
+# docker-compose up -d
+#
+# 启动服务栈 + Nginx:
+# docker-compose --profile with-nginx up -d
+#
+# 启动开发环境:
+# docker-compose --profile development up -d
+#
+# 查看日志:
+# docker-compose logs -f backend
+# docker-compose logs -f database
+#
+# 停止所有服务:
+# docker-compose down
+#
+# 停止并删除数据卷:
+# docker-compose down -v
+#
+# 重新构建镜像:
+# docker-compose build --no-cache
+#
+# 进入容器调试:
+# docker-compose exec backend sh
+# docker-compose exec database bash
+#
+# 数据库备份:
+# docker-compose exec database /scripts/backup.sh
+#
+# 查看服务状态:
+# docker-compose ps
+# docker-compose top
+# ========================================

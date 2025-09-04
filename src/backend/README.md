@@ -1,53 +1,141 @@
-# GCCC 后端服务
+# GCCC 后端项目结构
 
-GCCC项目的后端服务，提供RESTful API和WebSocket支持。
+## 项目概述
+
+GCCC 后端服务是一个基于 Node.js + Express 构建的 Web3 DApp 后端系统，提供用户认证、权限管理、积分系统、提案投票、质押系统等核心功能。
 
 ## 目录结构
 
 ```
-backend/
-├── api/               # API路由和控制器
-│   ├── auth/          # 认证相关API
-│   ├── users/         # 用户管理API
-│   ├── proposals/     # 提案管理API
-│   ├── voting/        # 投票相关API
-│   ├── staking/       # 质押相关API
-│   ├── lottery/       # 抽奖相关API
-│   └── synthesis/     # 合成相关API
-├── services/          # 业务逻辑服务
-│   ├── auth.service.js
-│   ├── user.service.js
-│   ├── proposal.service.js
-│   ├── voting.service.js
-│   ├── staking.service.js
-│   ├── lottery.service.js
-│   └── synthesis.service.js
-├── models/            # 数据模型
-│   ├── User.js
-│   ├── Proposal.js
-│   ├── Vote.js
-│   ├── Stake.js
-│   └── Transaction.js
-├── middleware/        # 中间件
-│   ├── auth.js
-│   ├── validation.js
-│   ├── rateLimit.js
-│   └── logging.js
-├── utils/             # 工具函数
-│   ├── crypto.js
-│   ├── validation.js
-│   └── helpers.js
-├── config/            # 配置文件
-│   ├── database.js
-│   ├── redis.js
-│   └── solana.js
-└── README.md          # 本文件
+src/backend/
+├── docs/                           # 文档目录
+│   ├── API_Documentation.md        # API接口文档
+│   └── README.md                   # 项目说明文档
+├── api/                            # API路由目录
+│   ├── auth/                       # 认证相关路由
+│   │   ├── auth.routes.js          # 认证路由定义
+│   │   ├── auth.controller.js      # 认证控制器
+│   │   └── auth.validation.js      # 认证参数验证
+│   ├── user/                       # 用户管理路由
+│   │   ├── user.routes.js          # 用户路由定义
+│   │   ├── user.controller.js      # 用户控制器
+│   │   └── user.validation.js      # 用户参数验证
+│   ├── admin/                      # 管理员路由
+│   │   ├── admin.routes.js         # 管理员路由定义
+│   │   ├── admin.controller.js     # 管理员控制器
+│   │   └── admin.validation.js     # 管理员参数验证
+│   ├── points/                     # 积分系统路由
+│   │   ├── points.routes.js        # 积分路由定义
+│   │   ├── points.controller.js    # 积分控制器
+│   │   └── points.validation.js    # 积分参数验证
+│   ├── proposals/                  # 提案投票路由
+│   │   ├── proposals.routes.js     # 提案路由定义
+│   │   ├── proposals.controller.js # 提案控制器
+│   │   └── proposals.validation.js # 提案参数验证
+│   ├── staking/                    # 质押系统路由
+│   │   ├── staking.routes.js       # 质押路由定义
+│   │   ├── staking.controller.js   # 质押控制器
+│   │   └── staking.validation.js   # 质押参数验证
+│   ├── lottery/                    # 抽奖系统路由
+│   │   ├── lottery.routes.js       # 抽奖路由定义
+│   │   ├── lottery.controller.js   # 抽奖控制器
+│   │   └── lottery.validation.js   # 抽奖参数验证
+│   ├── nft/                        # NFT管理路由
+│   │   ├── nft.routes.js           # NFT路由定义
+│   │   ├── nft.controller.js       # NFT控制器
+│   │   └── nft.validation.js       # NFT参数验证
+│   └── index.js                    # 路由入口文件
+├── middleware/                     # 中间件目录
+│   ├── auth.middleware.js          # 身份验证中间件
+│   ├── permission.middleware.js    # 权限检查中间件
+│   ├── validation.middleware.js    # 参数验证中间件
+│   ├── rateLimit.middleware.js     # 频率限制中间件
+│   ├── error.middleware.js         # 错误处理中间件
+│   ├── logging.middleware.js       # 日志记录中间件
+│   └── cors.middleware.js          # 跨域处理中间件
+├── services/                       # 服务层目录
+│   ├── database/                   # 数据库服务
+│   │   ├── index.js                # 数据库连接配置
+│   │   ├── auth.service.js         # 认证数据服务
+│   │   ├── user.service.js         # 用户数据服务
+│   │   ├── points.service.js       # 积分数据服务
+│   │   ├── proposals.service.js    # 提案数据服务
+│   │   ├── staking.service.js      # 质押数据服务
+│   │   ├── lottery.service.js      # 抽奖数据服务
+│   │   └── nft.service.js          # NFT数据服务
+│   ├── blockchain/                 # 区块链服务
+│   │   ├── index.js                # Solana连接配置
+│   │   ├── wallet.service.js       # 钱包验证服务
+│   │   ├── token.service.js        # Token操作服务
+│   │   ├── nft.service.js          # NFT操作服务
+│   │   └── staking.service.js      # 质押合约服务
+│   ├── external/                   # 外部服务
+│   │   ├── email.service.js        # 邮件发送服务
+│   │   ├── ipfs.service.js         # IPFS存储服务
+│   │   └── oracle.service.js       # 预言机服务
+│   └── cache/                      # 缓存服务
+│       ├── redis.service.js        # Redis缓存服务
+│       └── memory.service.js       # 内存缓存服务
+├── utils/                          # 工具函数目录
+│   ├── crypto.js                   # 加密工具
+│   ├── validation.js               # 验证工具
+│   ├── response.js                 # 响应格式化工具
+│   ├── logger.js                   # 日志工具
+│   ├── constants.js                # 常量定义
+│   ├── helpers.js                  # 辅助函数
+│   └── errors.js                   # 错误定义
+├── config/                         # 配置文件目录
+│   ├── database.js                 # 数据库配置
+│   ├── blockchain.js               # 区块链配置
+│   ├── server.js                   # 服务器配置
+│   ├── security.js                 # 安全配置
+│   └── index.js                    # 配置入口文件
+├── tests/                          # 测试目录
+│   ├── unit/                       # 单元测试
+│   ├── integration/                # 集成测试
+│   ├── fixtures/                   # 测试数据
+│   └── helpers/                    # 测试辅助函数
+├── scripts/                        # 脚本目录
+│   ├── migrate.js                  # 数据库迁移脚本
+│   ├── seed.js                     # 数据种子脚本
+│   └── deploy.js                   # 部署脚本
+├── app.js                          # Express应用入口
+├── server.js                       # 服务器启动文件
+├── package.json                    # 项目依赖配置
+├── .env.example                    # 环境变量示例
+├── .gitignore                      # Git忽略文件
+├── README.md                       # 项目说明
+└── ecosystem.config.js             # PM2配置文件
 ```
 
 ## 技术栈
 
 ### 核心框架
-- **运行时**: Node.js 18+
+- **Node.js**: JavaScript运行时
+- **Express.js**: Web应用框架
+- **PostgreSQL**: 关系型数据库
+- **Redis**: 缓存和会话存储
+
+### Web3集成
+- **@solana/web3.js**: Solana区块链交互
+- **@solana/spl-token**: SPL Token操作
+- **@metaplex-foundation/js**: NFT操作
+
+### 身份验证
+- **jsonwebtoken**: JWT token生成和验证
+- **bcryptjs**: 密码哈希
+- **tweetnacl**: 钱包签名验证
+
+### 数据验证
+- **joi**: 输入参数验证
+- **express-validator**: Express验证中间件
+
+### 开发工具
+- **nodemon**: 开发热重载
+- **jest**: 单元测试框架
+- **supertest**: API测试
+- **eslint**: 代码规范检查
+- **prettier**: 代码格式化
 - **框架**: Express.js
 - **语言**: TypeScript
 - **API文档**: Swagger/OpenAPI

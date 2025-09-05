@@ -8,10 +8,10 @@ param(
     [string]$DbPort = "5432", 
     [string]$DbName = "gccc_development_db",
     [string]$DbUser = "gccc_user",
-    [string]$DbPassword = "",
+    [string]$DbPassword = "gccc_secure_password_2024",
     [string]$RedisHost = "localhost",
     [string]$RedisPort = "6379",
-    [string]$RedisPassword = "",
+    [string]$RedisPassword = "redis_secure_password_2024",
     [switch]$Verbose = $false,
     [switch]$Help = $false
 )

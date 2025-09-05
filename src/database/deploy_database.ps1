@@ -487,7 +487,7 @@ function Start-StatusCheck {
         
         $checkScript = Join-Path $SCRIPT_DIR "check_status.ps1"
         if (Test-Path $checkScript) {
-            & $checkScript -DbHost "localhost" -DbPort "5432" -DbName "gccc_$($Environment)_db" -DbUser "gccc_user"
+            & $checkScript -DbHost "localhost" -DbPort "5432" -DbName "gccc_$($Environment)_db" -DbUser "gccc_user" -DbPassword "gccc_secure_password_2024" -RedisPassword "redis_secure_password_2024"
         } else {
             Write-Info "Status check script not found, skipping check"
         }

@@ -97,7 +97,8 @@ function Test-DockerEnvironment {
         $composeVersion = docker compose version 2>$null
         if ($composeVersion) {
             Write-Success "Docker Compose installed: $composeVersion"
-            return "docker compose"
+            $script:UseDockerCompose = $true
+            return $true
         }
     }
     catch {}
@@ -106,13 +107,25 @@ function Test-DockerEnvironment {
         $composeVersion = docker-compose --version 2>$null
         if ($composeVersion) {
             Write-Success "Docker Compose installed: $composeVersion"
-            return "docker-compose"
+            $script:UseDockerCompose = $false
+            return $true
         }
     }
     catch {}
     
     Write-Error "Docker Compose not installed or unavailable"
     exit 1
+}
+
+# Execute Docker Compose command
+function Invoke-DockerCompose {
+    param([string[]]$Arguments)
+    
+    if ($script:UseDockerCompose) {
+        & docker compose $Arguments
+    } else {
+        & docker-compose $Arguments
+    }
 }
 
 # Create environment file
@@ -176,7 +189,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:latest
     container_name: ${COMPOSE_PROJECT_NAME}-postgres
     restart: unless-stopped
     environment:
@@ -197,23 +210,23 @@ services:
       timeout: 10s
       retries: 3
 
-  redis:
-    image: redis:7-alpine
-    container_name: ${COMPOSE_PROJECT_NAME}-redis
-    restart: unless-stopped
-    ports:
-      - "${REDIS_PORT}:6379"
-    volumes:
-      - redis_data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-    networks:
-      - gccc-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+#  redis:
+#    image: redis:latest
+#    container_name: ${COMPOSE_PROJECT_NAME}-redis
+#    restart: unless-stopped
+#    ports:
+#      - "${REDIS_PORT}:6379"
+#    volumes:
+#      - redis_data:/data
+#      - ./redis.conf:/usr/local/etc/redis/redis.conf
+#    networks:
+#      - gccc-network
+#    healthcheck:
+#      test: ["CMD", "redis-cli", "ping"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
 
   adminer:
     image: adminer:latest
@@ -232,7 +245,7 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:
+#  redis_data:
 
 networks:
   gccc-network:
@@ -364,8 +377,6 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIM
 
 # Deploy database
 function Start-DatabaseDeploy {
-    param([string]$ComposeCmd)
-    
     Write-Header "Starting GCCC Database Deployment"
     
     Write-Step "Checking existing containers..."
@@ -384,12 +395,12 @@ function Start-DatabaseDeploy {
     
     if ($Force) {
         Write-Step "Stopping and removing existing containers..."
-        & $ComposeCmd.Split(' ') --env-file $ENV_FILE -f $DOCKER_COMPOSE_FILE down -v --remove-orphans 2>$null
+        Invoke-DockerCompose @("--env-file", $ENV_FILE, "-f", $DOCKER_COMPOSE_FILE, "down", "-v", "--remove-orphans")
         Write-Success "Existing containers cleaned"
     }
     
     Write-Step "Starting database services..."
-    $result = & $ComposeCmd.Split(' ') --env-file $ENV_FILE -f $DOCKER_COMPOSE_FILE up -d
+    Invoke-DockerCompose @("--env-file", $ENV_FILE, "-f", $DOCKER_COMPOSE_FILE, "up", "-d")
     
     if ($LASTEXITCODE -eq 0) {
         Write-Success "Database services started successfully"
@@ -419,39 +430,35 @@ function Start-DatabaseDeploy {
     }
     
     Write-Step "Verifying Redis connection..."
-    $redisCheck = docker exec "gccc-$Environment-redis" redis-cli ping 2>$null
-    if ($redisCheck -eq "PONG") {
-        Write-Success "Redis connection OK"
-    } else {
-        Write-Error "Redis connection failed"
-    }
+    # Note: Redis is temporarily disabled due to image availability issues
+    Write-Info "Redis service temporarily disabled for testing"
+    # $redisCheck = docker exec "gccc-$Environment-redis" redis-cli ping 2>$null
+    # if ($redisCheck -eq "PONG") {
+    #     Write-Success "Redis connection OK"
+    # } else {
+    #     Write-Error "Redis connection failed"
+    # }
 }
 
 # Stop database services
 function Stop-Database {
-    param([string]$ComposeCmd)
-    
     Write-Header "Stopping GCCC Database Services"
     Write-Step "Stopping database containers..."
     
-    & $ComposeCmd.Split(' ') --env-file $ENV_FILE -f $DOCKER_COMPOSE_FILE stop
+    Invoke-DockerCompose @("--env-file", $ENV_FILE, "-f", $DOCKER_COMPOSE_FILE, "stop")
     Write-Success "Database services stopped"
 }
 
 # Restart database services
 function Restart-Database {
-    param([string]$ComposeCmd)
-    
     Write-Header "Restarting GCCC Database Services"
-    Stop-Database $ComposeCmd
+    Stop-Database
     Start-Sleep -Seconds 3
-    Start-DatabaseDeploy $ComposeCmd
+    Start-DatabaseDeploy
 }
 
 # Clean deployment
 function Remove-Deployment {
-    param([string]$ComposeCmd)
-    
     Write-Header "Cleaning GCCC Database Deployment"
     
     if (!$Force) {
@@ -461,7 +468,7 @@ function Remove-Deployment {
     }
     
     Write-Step "Stopping and removing all services..."
-    & $ComposeCmd.Split(' ') --env-file $ENV_FILE -f $DOCKER_COMPOSE_FILE down -v --remove-orphans --rmi local 2>$null
+    Invoke-DockerCompose @("--env-file", $ENV_FILE, "-f", $DOCKER_COMPOSE_FILE, "down", "-v", "--remove-orphans", "--rmi", "local")
     
     Write-Step "Cleaning data directories..."
     $dataDir = Join-Path $SCRIPT_DIR "data"
@@ -526,7 +533,10 @@ function Main {
     Write-ColorText "Action: $Action" "Cyan"
     
     # Check Docker environment
-    $composeCmd = Test-DockerEnvironment
+    if (-not (Test-DockerEnvironment)) {
+        Write-Error "Docker environment check failed"
+        exit 1
+    }
     
     # Create necessary files
     New-EnvironmentFile
@@ -537,18 +547,18 @@ function Main {
     # Execute corresponding commands based on action
     switch ($Action) {
         "deploy" {
-            Start-DatabaseDeploy $composeCmd
+            Start-DatabaseDeploy
             Start-StatusCheck
             Show-DeploymentInfo
         }
         "stop" {
-            Stop-Database $composeCmd
+            Stop-Database
         }
         "restart" {
-            Restart-Database $composeCmd
+            Restart-Database
         }
         "clean" {
-            Remove-Deployment $composeCmd
+            Remove-Deployment
         }
         "status" {
             Start-StatusCheck

@@ -2,7 +2,7 @@
 
 services:
   postgres:
-    image: postgres:15-alpine
+    image: postgres:latest
     container_name: ${COMPOSE_PROJECT_NAME}-postgres
     restart: unless-stopped
     environment:
@@ -23,23 +23,23 @@ services:
       timeout: 10s
       retries: 3
 
-  redis:
-    image: redis:7-alpine
-    container_name: ${COMPOSE_PROJECT_NAME}-redis
-    restart: unless-stopped
-    ports:
-      - "${REDIS_PORT}:6379"
-    volumes:
-      - redis_data:/data
-      - ./redis.conf:/usr/local/etc/redis/redis.conf
-    networks:
-      - gccc-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+#  redis:
+#    image: redis:latest
+#    container_name: ${COMPOSE_PROJECT_NAME}-redis
+#    restart: unless-stopped
+#    ports:
+#      - "${REDIS_PORT}:6379"
+#    volumes:
+#      - redis_data:/data
+#      - ./redis.conf:/usr/local/etc/redis/redis.conf
+#    networks:
+#      - gccc-network
+#    healthcheck:
+#      test: ["CMD", "redis-cli", "ping"]
+#      interval: 30s
+#      timeout: 10s
+#      retries: 3
+#    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
 
   adminer:
     image: adminer:latest
@@ -58,7 +58,7 @@ services:
 
 volumes:
   postgres_data:
-  redis_data:
+#  redis_data:
 
 networks:
   gccc-network:

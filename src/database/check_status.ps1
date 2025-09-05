@@ -92,7 +92,8 @@ function Test-PostgreSQLConnection {
     }
     
     # Try Docker container connection
-    $containers = docker ps --filter "name=gccc-*-postgres" --format "{{.Names}}" 2>$null
+    $allContainers = docker ps --format "{{.Names}}" 2>$null
+    $containers = $allContainers | Where-Object { $_ -like "*postgres*" }
     if ($containers) {
         $container = $containers | Select-Object -First 1
         $result = docker exec $container psql -U $DbUser -d $DbName -c "SELECT 1;" 2>$null
@@ -125,6 +126,21 @@ function Get-DatabaseInfo {
             }
             return $true
         }
+    } else {
+        # Try Docker
+        $allContainers = docker ps --format "{{.Names}}" 2>$null
+        $containers = $allContainers | Where-Object { $_ -like "*postgres*" }
+        if ($containers) {
+            $container = $containers | Select-Object -First 1
+            $result = docker exec $container psql -U $DbUser -d $DbName -t -c $sql 2>$null
+            if ($LASTEXITCODE -eq 0 -and $result) {
+                Write-Success "Database information retrieved (via Docker)"
+                if ($Verbose) {
+                    Write-Host $result
+                }
+                return $true
+            }
+        }
     }
     
     Write-Error "Failed to get database information"
@@ -153,12 +169,14 @@ WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
         }
     } else {
         # Try Docker
-        $containers = docker ps --filter "name=gccc-*-postgres" --format "{{.Names}}" 2>$null
+        $allContainers = docker ps --format "{{.Names}}" 2>$null
+        $containers = $allContainers | Where-Object { $_ -like "*postgres*" }
         if ($containers) {
             $container = $containers | Select-Object -First 1
             $result = docker exec $container psql -U $DbUser -d $DbName -t -c $sql 2>$null
             if ($LASTEXITCODE -eq 0 -and $result) {
-                $tableCount = [int]($result.Trim())
+                $resultString = if ($result -is [array]) { $result[0] } else { $result }
+                $tableCount = [int]($resultString.Trim())
             }
         }
     }
@@ -197,12 +215,14 @@ WHERE routine_schema = 'public' AND routine_type = 'FUNCTION';
         }
     } else {
         # Try Docker
-        $containers = docker ps --filter "name=gccc-*-postgres" --format "{{.Names}}" 2>$null
+        $allContainers = docker ps --format "{{.Names}}" 2>$null
+        $containers = $allContainers | Where-Object { $_ -like "*postgres*" }
         if ($containers) {
             $container = $containers | Select-Object -First 1
             $result = docker exec $container psql -U $DbUser -d $DbName -t -c $sql 2>$null
             if ($LASTEXITCODE -eq 0 -and $result) {
-                $functionCount = [int]($result.Trim())
+                $resultString = if ($result -is [array]) { $result[0] } else { $result }
+                $functionCount = [int]($resultString.Trim())
             }
         }
     }
@@ -242,7 +262,8 @@ ORDER BY extname;
         }
     } else {
         # Try Docker
-        $containers = docker ps --filter "name=gccc-*-postgres" --format "{{.Names}}" 2>$null
+        $allContainers = docker ps --format "{{.Names}}" 2>$null
+        $containers = $allContainers | Where-Object { $_ -like "*postgres*" }
         if ($containers) {
             $container = $containers | Select-Object -First 1
             $result = docker exec $container psql -U $DbUser -d $DbName -t -c $sql 2>$null
@@ -325,7 +346,8 @@ function Test-RedisConnection {
     }
     
     # Try Docker connection
-    $containers = docker ps --filter "name=gccc-*-redis" --format "{{.Names}}" 2>$null
+    $allContainers = docker ps --format "{{.Names}}" 2>$null
+    $containers = $allContainers | Where-Object { $_ -like "*redis*" }
     if ($containers) {
         $container = $containers | Select-Object -First 1
         $result = docker exec $container redis-cli ping 2>$null
@@ -361,7 +383,8 @@ function Invoke-HealthCheck {
         }
     } else {
         # Try Docker
-        $containers = docker ps --filter "name=gccc-*-postgres" --format "{{.Names}}" 2>$null
+        $allContainers = docker ps --format "{{.Names}}" 2>$null
+        $containers = $allContainers | Where-Object { $_ -like "*postgres*" }
         if ($containers) {
             $container = $containers | Select-Object -First 1
             $result = docker exec $container psql -U $DbUser -d $DbName -c $sql 2>$null

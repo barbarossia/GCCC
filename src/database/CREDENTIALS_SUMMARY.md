@@ -4,21 +4,21 @@ This document summarizes the database credentials used across the deployment and
 
 ## PostgreSQL Credentials
 
-| Parameter | deploy_database.ps1 | check_status.ps1 | Status |
-|-----------|-------------------|------------------|--------|
-| Host | localhost | localhost (default) | ✅ Consistent |
-| Port | 5432 | 5432 (default) | ✅ Consistent |
-| Database Name | gccc_${Environment}_db | gccc_development_db (default) | ✅ Passed dynamically |
-| Username | gccc_user | gccc_user (default) | ✅ Consistent |
-| Password | gccc_secure_password_2024 | gccc_secure_password_2024 (default) | ✅ Fixed & Consistent |
+| Parameter     | deploy_database.ps1       | check_status.ps1                    | Status                |
+| ------------- | ------------------------- | ----------------------------------- | --------------------- |
+| Host          | localhost                 | localhost (default)                 | ✅ Consistent         |
+| Port          | 5432                      | 5432 (default)                      | ✅ Consistent         |
+| Database Name | gccc\_${Environment}\_db  | gccc_development_db (default)       | ✅ Passed dynamically |
+| Username      | gccc_user                 | gccc_user (default)                 | ✅ Consistent         |
+| Password      | gccc_secure_password_2024 | gccc_secure_password_2024 (default) | ✅ Fixed & Consistent |
 
 ## Redis Credentials
 
-| Parameter | deploy_database.ps1 | check_status.ps1 | Status |
-|-----------|-------------------|------------------|--------|
-| Host | localhost | localhost (default) | ✅ Consistent |
-| Port | 6379 | 6379 (default) | ✅ Consistent |
-| Password | redis_secure_password_2024 | redis_secure_password_2024 (default) | ✅ Fixed & Consistent |
+| Parameter | deploy_database.ps1        | check_status.ps1                     | Status                |
+| --------- | -------------------------- | ------------------------------------ | --------------------- |
+| Host      | localhost                  | localhost (default)                  | ✅ Consistent         |
+| Port      | 6379                       | 6379 (default)                       | ✅ Consistent         |
+| Password  | redis_secure_password_2024 | redis_secure_password_2024 (default) | ✅ Fixed & Consistent |
 
 ## Parameter Passing
 
@@ -35,7 +35,7 @@ This ensures that the status check script uses the exact same credentials as the
 The scripts now properly support all three environments:
 
 - **Development**: `gccc_development_db`
-- **Test**: `gccc_test_db`  
+- **Test**: `gccc_test_db`
 - **Production**: `gccc_production_db`
 
 ## Security Notes

@@ -319,13 +319,13 @@ CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 CREATE EXTENSION IF NOT EXISTS "btree_gin";
 CREATE EXTENSION IF NOT EXISTS "pg_trgm";
 
-DO ${'$'}${'$'}
+DO `$`$
 BEGIN
     IF NOT EXISTS (SELECT FROM pg_catalog.pg_roles WHERE rolname = 'gccc_app') THEN
         CREATE ROLE gccc_app WITH LOGIN PASSWORD 'gccc_app_password_2024';
     END IF;
 END
-${'$'}${'$'};
+`$`$;
 
 GRANT CONNECT ON DATABASE gccc_$($Environment)_db TO gccc_app;
 GRANT CREATE ON SCHEMA public TO gccc_app;
@@ -333,7 +333,7 @@ GRANT USAGE ON SCHEMA public TO gccc_app;
 
 CREATE OR REPLACE FUNCTION database_health_check()
 RETURNS TABLE(check_name TEXT, status TEXT, details TEXT)
-AS ${'$'}${'$'}
+AS `$`$
 BEGIN
     RETURN QUERY SELECT 'connection'::TEXT, 'healthy'::TEXT, 'Database accessible'::TEXT;
     RETURN QUERY SELECT 
@@ -343,7 +343,7 @@ BEGIN
     FROM information_schema.tables 
     WHERE table_schema = 'public' AND table_type = 'BASE TABLE';
 END;
-${'$'}${'$'} LANGUAGE plpgsql;
+`$`$ LANGUAGE plpgsql;
 
 CREATE TABLE IF NOT EXISTS schema_migrations (
     version VARCHAR(255) PRIMARY KEY,

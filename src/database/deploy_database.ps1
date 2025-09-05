@@ -117,7 +117,7 @@ function Test-DockerEnvironment {
     exit 1
 }
 
-# Execute Docker Compose command
+# Execute Docker Compose command with retry
 function Invoke-DockerCompose {
     param([string[]]$Arguments)
     
@@ -128,7 +128,84 @@ function Invoke-DockerCompose {
     }
 }
 
-# Create environment file
+# Test prerequisites
+function Test-Prerequisites {
+    Write-Step "Testing prerequisites..."
+    
+    # Check if Docker is available
+    $dockerCheck = docker --version 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Docker is not installed or not available in PATH"
+    }
+    
+    # Check if Docker Compose is available
+    $composeCheck = docker-compose --version 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        throw "Docker Compose is not installed or not available in PATH"
+    }
+    
+    Write-Success "All prerequisites met"
+}
+
+# Pull Docker images with retry mechanism
+function Invoke-DockerPull {
+    param(
+        [string]$ImageName,
+        [int]$MaxRetries = 3,
+        [int]$DelaySeconds = 5
+    )
+    
+    Write-Step "Pulling Docker image: $ImageName"
+    
+    for ($i = 1; $i -le $MaxRetries; $i++) {
+        Write-Info "Attempt $i of $MaxRetries`: Pulling $ImageName"
+        
+        $output = docker pull $ImageName 2>&1
+        
+        if ($LASTEXITCODE -eq 0) {
+            Write-Success "Successfully pulled $ImageName"
+            return $true
+        }
+        
+        if ($i -lt $MaxRetries) {
+            Write-Warning "Failed to pull $ImageName, retrying in $DelaySeconds seconds..."
+            Start-Sleep -Seconds $DelaySeconds
+        } else {
+            Write-Error "Failed to pull $ImageName after $MaxRetries attempts"
+            return $false
+        }
+    }
+}
+
+# Pre-pull required Docker images
+function Initialize-DockerImages {
+    Write-Header "Preparing Docker Images"
+    
+    $requiredImages = @(
+        "postgres:latest",
+        "redis:latest"
+    )
+    
+    $pullSuccess = $true
+    $failedImages = @()
+    
+    foreach ($image in $requiredImages) {
+        if (!(Invoke-DockerPull -ImageName $image -MaxRetries 3)) {
+            $pullSuccess = $false
+            $failedImages += $image
+        }
+    }
+    
+    if (-not $pullSuccess) {
+        Write-Warning "Some Docker images failed to download:"
+        $failedImages | ForEach-Object { Write-Warning "  - $_" }
+        Write-Info "Services using failed images will be disabled"
+        return $false
+    }
+    
+    Write-Success "All required Docker images are ready"
+    return $true
+}
 function New-EnvironmentFile {
     Write-Step "Creating environment configuration file..."
     
@@ -180,24 +257,55 @@ HEALTH_CHECK_RETRIES=3
     Write-Success "Environment file created: $ENV_FILE"
 }
 
-# Create Docker Compose file
+# Create Docker Compose file with available services
 function New-DockerComposeFile {
+    param([bool]$IncludeRedis = $true)
+    
     Write-Step "Creating Docker Compose configuration..."
     
-    $composeContent = @'
+    # Check if Redis image is available
+    $redisAvailable = $IncludeRedis -and (docker images redis:latest --quiet 2>$null)
+    
+    $redisService = if ($redisAvailable) {
+        @'
+
+  redis:
+    image: redis:latest
+    container_name: ${COMPOSE_PROJECT_NAME}-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT}:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - gccc-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+'@
+    } else {
+        Write-Warning "Redis image not available - Redis service will be disabled"
+        ""
+    }
+    
+    $redisVolume = if ($redisAvailable) { "`n  redis_data:" } else { "" }
+    
+    $composeContent = @"
 version: '3.8'
 
 services:
   postgres:
     image: postgres:latest
-    container_name: ${COMPOSE_PROJECT_NAME}-postgres
+    container_name: `${COMPOSE_PROJECT_NAME}-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: `${POSTGRES_DB}
+      POSTGRES_USER: `${POSTGRES_USER}
+      POSTGRES_PASSWORD: `${POSTGRES_PASSWORD}
     ports:
-      - "${POSTGRES_PORT}:5432"
+      - "`${POSTGRES_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init:/docker-entrypoint-initdb.d
@@ -205,56 +313,26 @@ services:
     networks:
       - gccc-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U `${POSTGRES_USER} -d `${POSTGRES_DB}"]
       interval: 30s
       timeout: 10s
-      retries: 3
-
-#  redis:
-#    image: redis:latest
-#    container_name: ${COMPOSE_PROJECT_NAME}-redis
-#    restart: unless-stopped
-#    ports:
-#      - "${REDIS_PORT}:6379"
-#    volumes:
-#      - redis_data:/data
-#      - ./redis.conf:/usr/local/etc/redis/redis.conf
-#    networks:
-#      - gccc-network
-#    healthcheck:
-#      test: ["CMD", "redis-cli", "ping"]
-#      interval: 30s
-#      timeout: 10s
-#      retries: 3
-#    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
-
-  adminer:
-    image: adminer:latest
-    container_name: ${COMPOSE_PROJECT_NAME}-adminer
-    restart: unless-stopped
-    ports:
-      - "8080:8080"
-    environment:
-      ADMINER_DEFAULT_SERVER: postgres
-    networks:
-      - gccc-network
-    depends_on:
-      - postgres
-    profiles:
-      - admin
-
-volumes:
-  postgres_data:
-#  redis_data:
+      retries: 3${redisService}
 
 networks:
   gccc-network:
     driver: bridge
-    name: ${DOCKER_NETWORK}
-'@
 
-    $composeContent | Out-File -FilePath $DOCKER_COMPOSE_FILE -Encoding UTF8
-    Write-Success "Docker Compose file created: $DOCKER_COMPOSE_FILE"
+volumes:
+  postgres_data:${redisVolume}
+"@
+
+    $composeContent | Out-File -FilePath "docker-compose.yml" -Encoding UTF8
+    
+    if ($redisAvailable) {
+        Write-Host "✅ Docker Compose created with PostgreSQL and Redis" -ForegroundColor Green
+    } else {
+        Write-Host "⚠️  Docker Compose created with PostgreSQL only (Redis disabled)" -ForegroundColor Yellow
+    }
 }
 
 # Create Redis configuration file
@@ -305,6 +383,38 @@ function New-InitializationStructure {
             New-Item -ItemType Directory -Path $fullPath -Force | Out-Null
             Write-Success "Created directory: $dir"
         }
+    }
+}
+
+# Create environment file
+function New-EnvFile {
+    Write-Step "Creating environment configuration..."
+    
+    # Create .env file with all necessary variables
+    $envContent = @"
+# GCCC Database Configuration
+# Environment: $Environment
+# Generated: $(Get-Date -Format "yyyy-MM-dd HH:mm:ss")
+
+COMPOSE_PROJECT_NAME=gccc-$Environment
+POSTGRES_DB=gccc_$($Environment)_db
+POSTGRES_USER=gccc_user
+POSTGRES_PASSWORD=gccc_secure_password_2024
+POSTGRES_PORT=5432
+REDIS_PASSWORD=redis_secure_password_2024
+REDIS_PORT=6379
+"@
+
+    $envContent | Out-File -FilePath ".env" -Encoding UTF8
+    Write-Success "Environment file created"
+}
+
+# Create PostgreSQL initialization script
+function New-PostgresInitScript {
+    # Ensure init directory exists
+    $initDir = Join-Path $SCRIPT_DIR "init"
+    if (!(Test-Path $initDir)) {
+        New-Item -ItemType Directory -Path $initDir -Force | Out-Null
     }
     
     # Create initialization SQL script
@@ -377,67 +487,129 @@ ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value, updated_at = CURRENT_TIM
 
 # Deploy database
 function Start-DatabaseDeploy {
+    param([switch]$EnableRedis = $true)
+    
     Write-Header "Starting GCCC Database Deployment"
     
-    Write-Step "Checking existing containers..."
-    $existingContainers = docker ps -a --filter "name=$Environment" --format "{{.Names}}" 2>$null
-    
-    if ($existingContainers -and !$Force) {
-        Write-Info "Found existing containers:"
-        $existingContainers
-        $response = Read-Host "Force redeploy? (y/N)"
-        if ($response -ne "y" -and $response -ne "Y") {
-            Write-Info "Deployment cancelled"
-            return
+    try {
+        # Step 1: Check prerequisites
+        Test-Prerequisites
+        
+        # Step 2: Initialize directories and configuration files
+        New-InitializationStructure
+        New-EnvFile
+        New-PostgresInitScript
+        New-RedisConfig
+        
+        # Step 3: Try to pull Docker images with retry
+        Write-Step "Pulling Docker images..."
+        $postgresSuccess = Invoke-DockerPull "postgres:latest" -MaxRetries 3
+        if (-not $postgresSuccess) {
+            throw "Failed to pull PostgreSQL image after multiple attempts"
         }
-        $script:Force = $true
-    }
-    
-    if ($Force) {
-        Write-Step "Stopping and removing existing containers..."
-        Invoke-DockerCompose @("--env-file", $ENV_FILE, "-f", $DOCKER_COMPOSE_FILE, "down", "-v", "--remove-orphans")
-        Write-Success "Existing containers cleaned"
-    }
-    
-    Write-Step "Starting database services..."
-    Invoke-DockerCompose @("--env-file", $ENV_FILE, "-f", $DOCKER_COMPOSE_FILE, "up", "-d")
-    
-    if ($LASTEXITCODE -eq 0) {
+        Write-Success "PostgreSQL image ready"
+        
+        $redisSuccess = $false
+        if ($EnableRedis) {
+            $redisSuccess = Invoke-DockerPull "redis:latest" -MaxRetries 3
+            if ($redisSuccess) {
+                Write-Success "Redis image ready"
+            } else {
+                Write-Warning "Failed to pull Redis image - continuing with PostgreSQL only"
+            }
+        }
+        
+        # Step 4: Create Docker Compose file with available services
+        New-DockerComposeFile -IncludeRedis:$redisSuccess
+        
+        # Step 5: Handle existing containers
+        Write-Step "Checking existing containers..."
+        $existingContainers = docker ps -a --filter "name=$Environment" --format "{{.Names}}" 2>$null
+        
+        if ($existingContainers -and !$Force) {
+            Write-Info "Found existing containers:"
+            $existingContainers
+            $response = Read-Host "Force redeploy? (y/N)"
+            if ($response -ne "y" -and $response -ne "Y") {
+                Write-Info "Deployment cancelled"
+                return
+            }
+            $script:Force = $true
+        }
+        
+        if ($Force) {
+            Write-Step "Stopping and removing existing containers..."
+            docker-compose down --volumes 2>$null
+            Write-Success "Existing containers cleaned"
+        }
+        
+        # Step 6: Start services
+        Write-Step "Starting database services..."
+        $deployResult = docker-compose up -d
+        if ($LASTEXITCODE -ne 0) {
+            throw "Failed to start database services"
+        }
         Write-Success "Database services started successfully"
-    } else {
-        Write-Error "Database services failed to start"
-        exit 1
-    }
-    
-    Write-Step "Waiting for database to be ready..."
-    $maxWait = 60
-    $waited = 0
-    
-    do {
-        Start-Sleep -Seconds 2
-        $waited += 2
-        $pgReady = docker exec "gccc-$Environment-postgres" pg_isready -U gccc_user -d "gccc_$($Environment)_db" 2>$null
-        if ($pgReady) {
-            Write-Success "PostgreSQL ready (waited $waited seconds)"
-            break
+        
+        # Step 7: Wait for PostgreSQL to be ready
+        Write-Step "Waiting for PostgreSQL to be ready..."
+        $maxWait = 60
+        $waited = 0
+        
+        do {
+            Start-Sleep -Seconds 2
+            $waited += 2
+            $pgReady = docker exec "gccc-$Environment-postgres" pg_isready -U gccc_user -d "gccc_$($Environment)_db" 2>$null
+            if ($pgReady) {
+                Write-Success "PostgreSQL ready (waited $waited seconds)"
+                break
+            }
+            Write-Host "." -NoNewline
+        } while ($waited -lt $maxWait)
+        
+        if ($waited -ge $maxWait) {
+            throw "PostgreSQL startup timeout"
         }
-        Write-Host "." -NoNewline
-    } while ($waited -lt $maxWait)
-    
-    if ($waited -ge $maxWait) {
-        Write-Error "PostgreSQL startup timeout"
+        
+        # Step 8: Wait for Redis if enabled
+        if ($redisSuccess) {
+            Write-Step "Waiting for Redis to be ready..."
+            $maxRedisWait = 30
+            $redisWaited = 0
+            
+            do {
+                Start-Sleep -Seconds 2
+                $redisWaited += 2
+                $redisCheck = docker exec "gccc-$Environment-redis" redis-cli ping 2>$null
+                if ($redisCheck -eq "PONG") {
+                    Write-Success "Redis ready (waited $redisWaited seconds)"
+                    break
+                }
+                Write-Host "." -NoNewline
+            } while ($redisWaited -lt $maxRedisWait)
+            
+            if ($redisWaited -ge $maxRedisWait) {
+                Write-Warning "Redis startup timeout, but continuing deployment"
+            }
+        }
+        
+        Write-Header "Database Deployment Completed Successfully" -Color Green
+        Write-Host ""
+        Write-Host "Services Status:" -ForegroundColor Cyan
+        Write-Host "  ✅ PostgreSQL: Running on port $env:POSTGRES_PORT" -ForegroundColor Green
+        if ($redisSuccess) {
+            Write-Host "  ✅ Redis: Running on port $env:REDIS_PORT" -ForegroundColor Green
+        } else {
+            Write-Host "  ⚠️  Redis: Disabled (image not available)" -ForegroundColor Yellow
+        }
+        Write-Host ""
+        
+    } catch {
+        Write-Header "Database Deployment Failed" -Color Red
+        Write-Error $_.Exception.Message
+        Write-Host "Run 'docker-compose logs' to see container logs" -ForegroundColor Yellow
         exit 1
     }
-    
-    Write-Step "Verifying Redis connection..."
-    # Note: Redis is temporarily disabled due to image availability issues
-    Write-Info "Redis service temporarily disabled for testing"
-    # $redisCheck = docker exec "gccc-$Environment-redis" redis-cli ping 2>$null
-    # if ($redisCheck -eq "PONG") {
-    #     Write-Success "Redis connection OK"
-    # } else {
-    #     Write-Error "Redis connection failed"
-    # }
 }
 
 # Stop database services

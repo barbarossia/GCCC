@@ -190,7 +190,7 @@ function Invoke-SmartImagePull {
     
     for ($i = 1; $i -le $MaxRetries; $i++) {
         if ($MaxRetries -gt 1) {
-            Write-Info "Attempt $i of ${MaxRetries}: Pulling $ImageName"
+            Write-Info "Attempt $i of $MaxRetries: Pulling $ImageName"
         }
         
         $pullResult = docker pull $ImageName 2>&1

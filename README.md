@@ -38,8 +38,10 @@ GCCC/
 │   │   └── README.md     # 前端开发指南
 │   ├── backend/           # Node.js + Express 后端
 │   │   └── README.md     # 后端开发指南
-│   ├── database/          # PostgreSQL + Redis 数据库
-│   │   └── README.md     # 数据库设计文档
+│   ├── database/          # PostgreSQL + Redis 数据库 ✅
+│   │   ├── deploy_database.ps1  # 🚀 统一部署脚本
+│   │   ├── check_status.ps1     # 📊 状态检查脚本
+│   │   └── README.md            # 数据库部署指南
 │   ├── smart-contracts/   # Solana + Anchor 智能合约
 │   │   └── README.md     # 智能合约文档
 │   ├── test/             # 🧪 测试套件
@@ -49,6 +51,50 @@ GCCC/
 │   │   └── README.md     # 测试指南
 │   └── README.md         # 源码总览
 └── README.md             # 本文件
+```
+
+## 🚀 快速开始
+
+### 数据库部署
+
+**一键部署数据库服务（推荐）：**
+
+```powershell
+# 进入数据库目录
+cd src/database
+
+# 快速部署（使用本地镜像，1-2秒完成）
+.\deploy_database.ps1
+
+# 或者强制拉取最新镜像
+.\deploy_database.ps1 -PullLatest
+
+# 检查部署状态
+.\deploy_database.ps1 -Action status
+```
+
+**特性：**
+
+- ⚡ **超快部署**：1-2 秒完成（使用本地镜像）
+- 🎯 **智能管理**：自动检测本地镜像，避免不必要下载
+- 🛡️ **可靠稳定**：网络问题时自动回退到本地镜像
+- 🔧 **环境隔离**：支持开发/测试/生产环境
+- 📊 **健康监控**：自动检查服务状态
+
+### 前端开发
+
+```bash
+cd src/frontend
+npm install
+npm start
+```
+
+### 后端开发
+
+```bash
+cd src/backend
+npm install
+npm start
 ```
 
 ## 核心特性
@@ -145,6 +191,153 @@ GCCC/
 - **认证系统**: 自定义 Auth Context
 - **测试框架**: Vitest + React Testing Library
 - **开发工具**: ESLint + Prettier + TypeScript
+
+### 数据库部署方案 🗄️
+
+GCCC 提供了多种数据库部署脚本，支持 PostgreSQL 15 和 Redis 7 的快速部署：
+
+#### 1. 简化部署脚本 (推荐)
+
+**使用方法:**
+
+```powershell
+# 部署数据库服务
+.\src\database\deploy_database_simple.ps1 deploy
+
+# 查看服务状态
+.\src\database\deploy_database_simple.ps1 status
+
+# 查看服务日志
+.\src\database\deploy_database_simple.ps1 logs
+
+# 重启服务
+.\src\database\deploy_database_simple.ps1 restart
+
+# 停止服务
+.\src\database\deploy_database_simple.ps1 stop
+
+# 清理环境
+.\src\database\deploy_database_simple.ps1 clean
+```
+
+**特点:**
+
+- ✅ 基于测试验证的 Docker Compose 命令
+- ✅ 支持健康检查和错误处理
+- ✅ 自动创建必要的目录结构
+- ✅ 彩色输出和详细日志记录
+
+#### 2. 优化部署脚本
+
+**使用方法:**
+
+```powershell
+# 使用优化脚本部署（包含本地镜像检查）
+.\src\database\deploy_database_optimized_fixed.ps1 -Environment development -Timeout 120
+
+# 强制重新构建
+.\src\database\deploy_database_optimized_fixed.ps1 -Environment development -ForceRebuild
+
+# 拉取最新镜像
+.\src\database\deploy_database_optimized_fixed.ps1 -Environment development -PullLatest
+```
+
+**高级特性:**
+
+- 🔍 智能本地镜像检测
+- ⚡ 网络超时处理和重试机制
+- 📊 指数退避重试策略
+- 🎯 精细化的错误处理
+
+#### 3. 数据库管理工具集
+
+**使用方法:**
+
+```powershell
+# 部署服务
+.\src\database\database-toolkit.ps1 deploy
+
+# 查看详细状态（包含健康检查和资源使用）
+.\src\database\database-toolkit.ps1 status
+
+# 跟踪日志
+.\src\database\database-toolkit.ps1 logs -Follow
+
+# 创建数据库备份
+.\src\database\database-toolkit.ps1 backup -BackupName "pre_update_backup"
+
+# 恢复数据库
+.\src\database\database-toolkit.ps1 restore -RestoreFrom "pre_update_backup.sql"
+
+# 进入数据库 Shell
+.\src\database\database-toolkit.ps1 shell
+
+# 完全清理环境
+.\src\database\database-toolkit.ps1 clean -Force
+```
+
+**完整功能:**
+
+- 🚀 部署、停止、重启、清理
+- 📊 详细状态监控和健康检查
+- 📝 实时日志查看和历史记录
+- 💾 数据库备份和恢复
+- 🖥️ 交互式数据库 Shell
+- 📈 资源使用统计
+
+#### 4. 直接使用 Docker Compose
+
+**基本命令:**
+
+```bash
+# 启动服务（开发环境）
+docker-compose --env-file .env.development up -d
+
+# 查看服务状态
+docker-compose --env-file .env.development ps
+
+# 查看日志
+docker-compose --env-file .env.development logs -f
+
+# 停止服务
+docker-compose --env-file .env.development stop
+
+# 完全移除
+docker-compose --env-file .env.development down --volumes
+```
+
+**连接信息:**
+
+- **PostgreSQL**: `localhost:5432`
+  - 用户名: `gccc_user`
+  - 密码: `gccc_password`
+  - 数据库: `gccc_db`
+- **Redis**: `localhost:6379`
+  - 密码: `gccc_redis_password`
+
+#### 环境配置文件
+
+需要创建 `.env.development` 文件：
+
+```env
+# 项目设置
+COMPOSE_PROJECT_NAME=gccc-development
+
+# PostgreSQL 配置
+POSTGRES_DB=gccc_db
+POSTGRES_USER=gccc_user
+POSTGRES_PASSWORD=gccc_password
+POSTGRES_HOST=localhost
+POSTGRES_PORT=5432
+
+# Redis 配置
+REDIS_PASSWORD=gccc_redis_password
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# 数据目录
+DATA_DIR=./data
+```
 
 ### 后端技术栈
 

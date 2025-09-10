@@ -3,25 +3,41 @@
 # PostgreSQL数据库容器配置
 # ========================================
 
-# 使用官方 PostgreSQL 15 镜像
-FROM postgres:15-alpine
+# 使用官方 PostgreSQL 15 Alpine镜像（固定版本避免镜像更新问题）
+FROM postgres:15.4-alpine3.18
 
 # 设置维护者信息
 LABEL maintainer="GCCC Team"
 LABEL description="GCCC DApp PostgreSQL Database with initial schema and data"
 LABEL version="1.0.0"
 
+# 设置构建参数，优化镜像构建过程
+ARG BUILDKIT_INLINE_CACHE=1
+
 # 设置环境变量
 ENV POSTGRES_DB=gccc_db
 ENV POSTGRES_USER=gccc_user
 ENV POSTGRES_PASSWORD=gccc_password
 ENV PGDATA=/var/lib/postgresql/data/pgdata
+ENV POSTGRES_INITDB_ARGS="--auth-host=md5"
 
-# 安装额外的工具
-RUN apk add --no-cache \
-    curl \
-    bash \
-    && rm -rf /var/cache/apk/*
+# 设置网络超时环境变量
+ENV DOCKER_CLIENT_TIMEOUT=120
+ENV COMPOSE_HTTP_TIMEOUT=120
+
+# 安装额外的工具，增加网络重试机制
+RUN set -eux; \
+    # 配置 APK 源镜像和超时
+    echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/main" > /etc/apk/repositories; \
+    echo "http://dl-cdn.alpinelinux.org/alpine/v3.18/community" >> /etc/apk/repositories; \
+    # 增加网络超时设置
+    apk add --no-cache --timeout 60 --retries 3 \
+        curl \
+        bash \
+        wget \
+        netcat-openbsd \
+    && rm -rf /var/cache/apk/* \
+    && rm -rf /tmp/*
 
 # 创建必要的目录
 RUN mkdir -p /docker-entrypoint-initdb.d

@@ -1,6 +1,6 @@
 /**
  * 简化版 API路由入口文件 - 用于调试
- * 
+ *
  * @author GCCC Development Team
  * @version 1.0.0
  */
@@ -19,7 +19,7 @@ router.get('/', (req, res) => {
     message: 'GCCC API Server',
     version: '1.0.0',
     status: 'running',
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   });
 });
 
@@ -30,7 +30,7 @@ router.get('/health', (req, res) => {
   res.json({
     status: 'healthy',
     timestamp: new Date().toISOString(),
-    uptime: process.uptime()
+    uptime: process.uptime(),
   });
 });
 
@@ -40,14 +40,14 @@ router.get('/health', (req, res) => {
 router.post('/auth/login', (req, res) => {
   res.json({
     message: '登录功能待实现',
-    status: 'not_implemented'
+    status: 'not_implemented',
   });
 });
 
 router.post('/auth/register', (req, res) => {
   res.json({
     message: '注册功能待实现',
-    status: 'not_implemented'
+    status: 'not_implemented',
   });
 });
 
@@ -57,7 +57,7 @@ router.post('/auth/register', (req, res) => {
 router.get('/users/profile', (req, res) => {
   res.json({
     message: '用户资料功能待实现',
-    status: 'not_implemented'
+    status: 'not_implemented',
   });
 });
 

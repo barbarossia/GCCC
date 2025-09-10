@@ -1,0 +1,76 @@
+﻿version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    image: gccc-backend:latest
+    container_name: gccc-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+      - /app/node_modules
+    networks:
+      - gccc-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:latest
+    container_name: gccc-backend-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: gccc_development_db
+      POSTGRES_USER: gccc_user
+      POSTGRES_PASSWORD: gccc_secure_password_2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../database/init:/docker-entrypoint-initdb.d
+    networks:
+      - gccc-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gccc_user -d gccc_development_db"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:latest
+    container_name: gccc-backend-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - gccc-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  gccc-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  redis_data:

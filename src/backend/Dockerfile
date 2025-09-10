@@ -1,145 +1,131 @@
-# ========================================
-# GCCC Backend Service Dockerfile
-# Node.js API服务器容器配置
-# ========================================
+# ================================================================
+# GCCC Backend Simplified Dockerfile
+# Optimized for development and production
+# ================================================================
 
-# 使用官方 Node.js 18 LTS 版本作为基础镜像
+# Base Node.js image
 FROM node:18-alpine AS base
+LABEL maintainer="GCCC Development Team"
+LABEL version="1.0.0"
+LABEL description="GCCC Backend API Server"
 
-# 设置工作目录
+# Create app directory and user for security
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S gcccuser -u 1001 -G nodejs
+
 WORKDIR /app
 
-# 安装基础依赖和工具
-RUN apk add --no-cache \
-    curl \
-    dumb-init \
-    && rm -rf /var/cache/apk/*
-
-# 创建非特权用户
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nextjs -u 1001
-
-# ========================================
-# 依赖安装阶段
-# ========================================
-FROM base AS dependencies
-
-# 复制 package 文件
+# Copy package files for dependency installation
 COPY package*.json ./
 
-# 安装生产依赖
-RUN npm ci --only=production && npm cache clean --force
-
-# ========================================
-# 开发依赖安装阶段（用于构建和测试）
-# ========================================
+# ================================================================
+# Development Dependencies Stage
+# Contains all dependencies including dev dependencies
+# ================================================================
 FROM base AS dev-dependencies
 
-# 复制 package 文件
-COPY package*.json ./
+# Install all dependencies (including dev dependencies for testing)
+RUN npm install && \
+    npm cache clean --force
 
-# 安装所有依赖（包括开发依赖）
-RUN npm ci && npm cache clean --force
+# Copy application source code
+COPY --chown=gcccuser:nodejs . .
 
-# ========================================
-# 应用构建阶段
-# ========================================
-FROM dev-dependencies AS build
+USER gcccuser
 
-# 复制源代码
-COPY . .
-
-# 运行代码检查和测试
-RUN npm run lint
-# RUN npm run test  # 如果有测试则取消注释
-
-# 清理开发依赖，只保留生产依赖
-RUN npm prune --production
-
-# ========================================
-# 生产运行阶段
-# ========================================
-FROM base AS production
-
-# 设置环境变量
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOST=0.0.0.0
-
-# 从构建阶段复制生产依赖
-COPY --from=dependencies /app/node_modules ./node_modules
-
-# 复制应用代码（排除开发文件）
-COPY --chown=nextjs:nodejs . .
-
-# 移除不需要的文件
-RUN rm -rf \
-    tests/ \
-    docs/ \
-    .env.example \
-    .gitignore \
-    *.md \
-    ecosystem.config.js
-
-# 切换到非特权用户
-USER nextjs
-
-# 暴露端口
+# Expose port
 EXPOSE 3000
 
-# 健康检查
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:3000/health || exit 1
+# Health check (using node instead of external tools)
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/health',(r)=>process.exit(r.statusCode===200?0:1))"
 
-# 使用 dumb-init 启动应用
-ENTRYPOINT ["dumb-init", "--"]
-
-# 启动命令
-CMD ["node", "server.js"]
-
-# ========================================
-# 开发环境阶段
-# ========================================
-FROM dev-dependencies AS development
-
-# 设置开发环境变量
-ENV NODE_ENV=development
-ENV PORT=3000
-ENV HOST=0.0.0.0
-
-# 复制所有源代码
-COPY . .
-
-# 暴露端口
-EXPOSE 3000
-EXPOSE 9229
-
-# 开发模式启动命令（支持热重载和调试）
+# Default command for development  
 CMD ["npm", "run", "dev"]
 
-# ========================================
-# 使用说明：
-#
-# 构建生产镜像：
-# docker build --target production -t gccc-backend:latest .
-#
-# 构建开发镜像：
-# docker build --target development -t gccc-backend:dev .
-#
-# 运行生产容器：
-# docker run -d \
-#   --name gccc-backend \
-#   -p 3000:3000 \
-#   -e DATABASE_URL="postgresql://user:pass@host:5432/gccc_db" \
-#   -e JWT_SECRET="your-secret-key" \
-#   gccc-backend:latest
-#
-# 运行开发容器：
-# docker run -d \
-#   --name gccc-backend-dev \
-#   -p 3000:3000 \
-#   -p 9229:9229 \
-#   -v $(pwd):/app \
-#   -v /app/node_modules \
-#   gccc-backend:dev
-# ========================================
+# ================================================================
+# Production Dependencies Stage  
+# Only production dependencies for smaller image
+# ================================================================
+FROM base AS prod-dependencies
+
+# Set production environment
+ENV NODE_ENV=production
+
+# Install only production dependencies
+RUN npm install --only=production && \
+    npm cache clean --force
+
+# ================================================================
+# Test Stage
+# For running tests in CI/CD pipeline
+# ================================================================
+FROM dev-dependencies AS test
+
+# Set test environment
+ENV NODE_ENV=test
+
+# Create test directories
+RUN mkdir -p coverage test-results
+
+# Health check for test environment
+HEALTHCHECK --interval=10s --timeout=5s --start-period=10s --retries=2 \
+    CMD node -e "require('http').get('http://localhost:3001/health',(r)=>process.exit(r.statusCode===200?0:1))"
+
+# Default test command
+CMD ["npm", "test"]
+
+# ================================================================
+# Production Stage
+# Final optimized production image
+# ================================================================
+FROM base AS production
+
+# Set production environment
+ENV NODE_ENV=production \
+    PORT=3000 \
+    LOG_LEVEL=info
+
+# Copy production dependencies
+COPY --from=prod-dependencies --chown=gcccuser:nodejs /app/node_modules ./node_modules
+
+# Copy application source (since we don't have a build step for now)
+COPY --chown=gcccuser:nodejs . .
+
+# Create necessary directories with proper permissions
+RUN mkdir -p logs temp uploads && \
+    chown -R gcccuser:nodejs logs temp uploads
+
+# Switch to non-root user
+USER gcccuser
+
+# Expose port
+EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/health',(r)=>process.exit(r.statusCode===200?0:1))"
+
+# Production startup command
+CMD ["node", "server.js"]
+
+# ================================================================
+# Development Hot-reload Stage
+# For local development with hot reloading
+# ================================================================
+FROM dev-dependencies AS development
+
+# Set development environment
+ENV NODE_ENV=development \
+    PORT=3000 \
+    LOG_LEVEL=debug
+
+# Create development directories
+RUN mkdir -p logs temp uploads
+
+# Health check for development
+HEALTHCHECK --interval=30s --timeout=10s --start-period=20s --retries=3 \
+    CMD node -e "require('http').get('http://localhost:3000/health',(r)=>process.exit(r.statusCode===200?0:1))"
+
+# Development command with hot reloading
+CMD ["npm", "run", "dev"]

@@ -1,0 +1,120 @@
+version: '3.8'
+
+# Docker Compose configuration for GCCC Backend testing
+# This includes test database and services for running unit/integration tests
+
+services:
+  # Test Database (PostgreSQL)
+  test-postgres:
+    image: postgres:latest
+    container_name: gccc-test-postgres
+    restart: "no"  # Don't restart test containers
+    environment:
+      POSTGRES_DB: gccc_test_db
+      POSTGRES_USER: gccc_user
+      POSTGRES_PASSWORD: gccc_secure_password_2024
+    ports:
+      - "5433:5432"  # Different port to avoid conflicts
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+      - ../database/init:/docker-entrypoint-initdb.d
+    networks:
+      - gccc-test-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gccc_user -d gccc_test_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Test Redis
+  test-redis:
+    image: redis:latest
+    container_name: gccc-test-redis
+    restart: "no"
+    ports:
+      - "6380:6379"  # Different port to avoid conflicts
+    volumes:
+      - test_redis_data:/data
+    networks:
+      - gccc-test-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Test Runner Container
+  backend-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev-dependencies
+    image: gccc-backend:test
+    container_name: gccc-backend-test
+    environment:
+      NODE_ENV: test
+      DB_HOST: test-postgres
+      DB_PORT: 5432
+      DB_NAME: gccc_test_db
+      DB_USER: gccc_user
+      DB_PASSWORD: gccc_secure_password_2024
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis_secure_password_2024
+      TEST_TIMEOUT: 30000
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - test_coverage:/app/coverage
+    networks:
+      - gccc-test-network
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    profiles:
+      - test
+    command: ["npm", "run", "test"]
+
+  # Coverage Reporter
+  test-coverage:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev-dependencies
+    image: gccc-backend:test
+    container_name: gccc-test-coverage
+    environment:
+      NODE_ENV: test
+      DB_HOST: test-postgres
+      DB_PORT: 5432
+      DB_NAME: gccc_test_db
+      DB_USER: gccc_user
+      DB_PASSWORD: gccc_secure_password_2024
+      REDIS_HOST: test-redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: redis_secure_password_2024
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - test_coverage:/app/coverage
+    networks:
+      - gccc-test-network
+    depends_on:
+      test-postgres:
+        condition: service_healthy
+      test-redis:
+        condition: service_healthy
+    profiles:
+      - coverage
+    command: ["npm", "run", "test:coverage"]
+
+networks:
+  gccc-test-network:
+    driver: bridge
+
+volumes:
+  test_postgres_data:
+  test_redis_data:
+  test_coverage:

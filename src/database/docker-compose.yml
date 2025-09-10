@@ -2,13 +2,16 @@
 
 services:
   postgres:
-    image: postgres:latest
-    container_name: ${COMPOSE_PROJECT_NAME}-postgres
+    image: postgres:15-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-gccc}-postgres
     restart: unless-stopped
+    pull_policy: if_not_present
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      # 设置超时参数
+      POSTGRES_INITDB_ARGS: "--auth-host=md5"
     ports:
       - "${POSTGRES_PORT}:5432"
     volumes:
@@ -18,30 +21,81 @@ services:
     networks:
       - gccc-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test:
+        ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB} -t 10"]
       interval: 30s
-      timeout: 10s
-      retries: 3
+      timeout: 20s
+      retries: 5
+      start_period: 60s
+    # 容器启动超时设置
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+        window: 120s
   redis:
-    image: redis:latest
-    container_name: ${COMPOSE_PROJECT_NAME}-redis
+    image: redis:7-alpine
+    container_name: ${COMPOSE_PROJECT_NAME:-gccc}-redis
     restart: unless-stopped
+    pull_policy: if_not_present
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
     ports:
       - "${REDIS_PORT}:6379"
     volumes:
       - redis_data:/data
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - gccc-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
       interval: 30s
-      timeout: 10s
-      retries: 3
+      timeout: 15s
+      retries: 5
+      start_period: 30s
+    # 容器启动超时设置
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 5
+        window: 60s
 
 networks:
   gccc-network:
     driver: bridge
+    driver_opts:
+      com.docker.network.bridge.default_bridge: "false"
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.host_binding_ipv4: "0.0.0.0"
+      com.docker.network.driver.mtu: "1500"
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
 
 volumes:
   postgres_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/postgres
   redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/data/redis
+
+# 全局配置
+x-common-variables: &common-variables # 镜像拉取策略：优先使用本地镜像
+  pull_policy: if_not_present
+
+x-restart-policy: &restart-policy
+  restart_policy:
+    condition: on-failure
+    delay: 10s
+    max_attempts: 5
+    window: 120s
